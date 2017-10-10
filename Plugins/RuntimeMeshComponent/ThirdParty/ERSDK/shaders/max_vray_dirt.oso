@@ -1,0 +1,165 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.7.2
+# options: 
+shader max_vray_dirt
+param	float	tex_radius	10		%read{62,62} %write{2147483647,-1}
+param	color	tex_occluded_color	0 0 0		%read{73,73} %write{2147483647,-1}
+param	color	tex_unoccluded_color	1 1 1		%read{74,74} %write{2147483647,-1}
+param	int	tex_subdivs	8		%read{3,70} %write{2147483647,-1}
+oparam	color	result	0 0 0		%read{2147483647,-1} %write{75,75}
+oparam	float	result_alpha	1		%read{2147483647,-1} %write{2147483647,-1}
+oparam	vector	result_bump	0 0 0		%read{2147483647,-1} %write{2147483647,-1}
+global	point	P	%read{62,62} %write{2147483647,-1} %derivs
+global	normal	N	%read{40,40} %write{2147483647,-1} %derivs
+local	float	___366_PI_OVER_4	%read{3,67} %write{3,67} %derivs
+local	float	___366_PI_OVER_2	%read{3,67} %write{3,67} %derivs
+local	float	___366_phi	%read{3,67} %write{3,67} %derivs
+local	float	___366_r	%read{3,67} %write{3,67} %derivs
+local	float	___366_a	%read{3,67} %write{3,67} %derivs
+local	float	___366_b	%read{3,67} %write{3,67} %derivs
+local	float	___366_x	%read{3,67} %write{3,67} %derivs
+local	float	___366_y	%read{3,67} %write{3,67} %derivs
+local	float	___366_cos_theta	%read{3,67} %write{3,67} %derivs
+local	vector	___366_w	%read{3,67} %write{3,67} %derivs
+local	vector	___366_u	%read{3,67} %write{3,67} %derivs
+local	vector	___366_v	%read{3,67} %write{3,67} %derivs
+local	vector	___366_out	%read{3,67} %write{3,67} %derivs
+local	int	hits	%read{3,68} %write{0,67}
+local	int	___370_i	%read{3,67} %write{2,67} %derivs
+local	point	___371_rand	%read{3,67} %write{3,67} %derivs
+local	vector	___371_R	%read{3,67} %write{3,67} %derivs
+local	float	occlusion	%read{72,74} %write{71,71}
+const	int	$const1	0		%read{0,46} %write{2147483647,-1}
+temp	int	$tmp1	%read{1,67} %write{2,67}
+const	point	$const2	0 0 0		%read{4,4} %write{2147483647,-1}
+temp	int	$tmp2	%read{2147483647,-1} %write{3,67}
+const	string	$const3	"random2d"		%read{5,5} %write{2147483647,-1}
+temp	float	$tmp3	%read{3,67} %write{3,67} %derivs
+const	int	$const4	1		%read{7,67} %write{2147483647,-1}
+temp	float	$tmp4	%read{3,67} %write{3,67} %derivs
+const	string	$const5	"sample_cosine_hemisphere"		%read{8,8} %write{2147483647,-1}
+const	float	$const6	3.1415927		%read{9,10} %write{2147483647,-1}
+const	float	$const8	4		%read{9,9} %write{2147483647,-1}
+const	int	$const9	2		%read{45,49} %write{2147483647,-1}
+const	float	$const10	2		%read{10,13} %write{2147483647,-1}
+temp	float	$tmp5	%read{3,67} %write{3,67} %derivs
+const	float	$const11	1		%read{12,72} %write{2147483647,-1}
+temp	float	$tmp6	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp7	%read{3,67} %write{3,67}
+temp	float	$tmp8	%read{3,67} %write{3,67}
+temp	int	$tmp9	%read{3,67} %write{3,67}
+temp	float	$tmp10	%read{3,67} %write{3,67} %derivs
+temp	int	$tmp11	%read{3,67} %write{3,67}
+temp	float	$tmp12	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp13	%read{3,67} %write{3,67} %derivs
+const	float	$const12	0		%read{28,52} %write{2147483647,-1}
+temp	float	$tmp14	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp15	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp16	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp17	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp18	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp19	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp20	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp21	%read{3,67} %write{3,67}
+temp	float	$tmp22	%read{3,67} %write{3,67}
+const	float	$const13	0.0099999998		%read{43,62} %write{2147483647,-1}
+temp	int	$tmp23	%read{3,67} %write{3,67}
+temp	float	$tmp24	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp25	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp26	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp27	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp28	%read{3,67} %write{3,67} %derivs
+temp	float	$tmp29	%read{3,67} %write{3,67} %derivs
+temp	vector	$tmp30	%read{3,67} %write{3,67} %derivs
+temp	vector	$tmp31	%read{3,67} %write{3,67} %derivs
+temp	vector	$tmp32	%read{3,67} %write{3,67} %derivs
+temp	vector	$tmp33	%read{3,67} %write{3,67} %derivs
+temp	int	$tmp34	%read{3,67} %write{3,67}
+const	string	$const14	"mindist"		%read{62,62} %write{2147483647,-1}
+const	string	$const15	"maxdist"		%read{62,62} %write{2147483647,-1}
+temp	int	$tmp35	%read{2147483647,-1} %write{3,67}
+temp	int	$tmp36	%read{2147483647,-1} %write{3,67}
+temp	int	$tmp37	%read{69,69} %write{68,68}
+temp	float	$tmp38	%read{71,71} %write{69,69}
+temp	float	$tmp39	%read{71,71} %write{70,70}
+temp	float	$tmp40	%read{73,73} %write{72,72}
+temp	color	$tmp41	%read{75,75} %write{73,73}
+temp	color	$tmp42	%read{75,75} %write{74,74}
+code ___main___
+	assign		hits $const1 	%filename{"E:/github/elaramax/Shaders/max_vray_dirt.osl"} %line{61} %argrw{"wr"}
+	for		$tmp1 3 4 66 68 	%line{63} %argrw{"r"}
+	assign		___370_i $const1 	%argrw{"wr"}
+	lt		$tmp1 ___370_i tex_subdivs 	%argrw{"wrr"}
+	assign		___371_rand $const2 	%line{65} %argrw{"wr"}
+	getattribute	$tmp2 $const3 ___370_i ___371_rand 	%line{66} %argrw{"wrrw"}
+	compref		$tmp3 ___371_rand $const1 	%line{67} %argrw{"wrr"}
+	compref		$tmp4 ___371_rand $const4 	%argrw{"wrr"}
+	functioncall	$const5 62 	%argrw{"r"}
+	div		___366_PI_OVER_4 $const6 $const8 	%line{21} %argrw{"wrr"}
+	div		___366_PI_OVER_2 $const6 $const10 	%line{22} %argrw{"wrr"}
+	mul		$tmp5 $const10 $tmp3 	%line{24} %argrw{"wrr"}
+	sub		___366_a $tmp5 $const11 	%argrw{"wrr"}
+	mul		$tmp6 $const10 $tmp4 	%line{25} %argrw{"wrr"}
+	sub		___366_b $tmp6 $const11 	%argrw{"wrr"}
+	mul		$tmp7 ___366_a ___366_a 	%line{26} %argrw{"wrr"}
+	mul		$tmp8 ___366_b ___366_b 	%argrw{"wrr"}
+	gt		$tmp9 $tmp7 $tmp8 	%argrw{"wrr"}
+	if		$tmp9 22 30 	%argrw{"r"}
+	assign		___366_r ___366_a 	%line{27} %argrw{"wr"}
+	div		$tmp10 ___366_b ___366_a 	%line{28} %argrw{"wrr"}
+	mul		___366_phi ___366_PI_OVER_4 $tmp10 	%argrw{"wrr"}
+	neq		$tmp11 ___366_b $const1 	%line{30} %argrw{"wrr"}
+	if		$tmp11 28 30 	%argrw{"r"}
+	assign		___366_r ___366_b 	%line{31} %argrw{"wr"}
+	div		$tmp12 ___366_a ___366_b 	%line{32} %argrw{"wrr"}
+	mul		$tmp13 ___366_PI_OVER_4 $tmp12 	%argrw{"wrr"}
+	sub		___366_phi ___366_PI_OVER_2 $tmp13 	%argrw{"wrr"}
+	assign		___366_r $const12 	%line{35} %argrw{"wr"}
+	assign		___366_phi $const12 	%line{36} %argrw{"wr"}
+	sin		$tmp14 ___366_phi 	%line{38} %argrw{"wr"}
+	mul		___366_x ___366_r $tmp14 	%argrw{"wrr"}
+	cos		$tmp15 ___366_phi 	%line{39} %argrw{"wr"}
+	mul		___366_y ___366_r $tmp15 	%argrw{"wrr"}
+	mul		$tmp17 ___366_x ___366_x 	%line{40} %argrw{"wrr"}
+	sub		$tmp18 $const11 $tmp17 	%argrw{"wrr"}
+	mul		$tmp19 ___366_y ___366_y 	%argrw{"wrr"}
+	sub		$tmp20 $tmp18 $tmp19 	%argrw{"wrr"}
+	max		$tmp16 $tmp20 $const12 	%argrw{"wrr"}
+	sqrt		___366_cos_theta $tmp16 	%argrw{"wr"}
+	assign		___366_w N 	%line{41} %argrw{"wr"}
+	compref		$tmp22 ___366_w $const1 	%line{42} %argrw{"wrr"}
+	abs		$tmp21 $tmp22 	%argrw{"wr"}
+	gt		$tmp23 $tmp21 $const13 	%argrw{"wrr"}
+	if		$tmp23 49 53 	%argrw{"r"}
+	compref		$tmp24 ___366_w $const9 	%argrw{"wrr"}
+	compref		$tmp25 ___366_w $const1 	%argrw{"wrr"}
+	neg		$tmp26 $tmp25 	%argrw{"wr"}
+	vector		___366_u $tmp24 $const12 $tmp26 	%argrw{"wrrr"}
+	compref		$tmp27 ___366_w $const9 	%argrw{"wrr"}
+	neg		$tmp28 $tmp27 	%argrw{"wr"}
+	compref		$tmp29 ___366_w $const4 	%argrw{"wrr"}
+	vector		___366_u $const12 $tmp28 $tmp29 	%argrw{"wrrr"}
+	normalize	___366_u ___366_u 	%line{43} %argrw{"wr"}
+	cross		___366_v ___366_w ___366_u 	%line{44} %argrw{"wrr"}
+	mul		$tmp30 ___366_x ___366_u 	%line{45} %argrw{"wrr"}
+	mul		$tmp31 ___366_y ___366_v 	%argrw{"wrr"}
+	add		$tmp32 $tmp30 $tmp31 	%argrw{"wrr"}
+	mul		$tmp33 ___366_cos_theta ___366_w 	%argrw{"wrr"}
+	add		___366_out $tmp32 $tmp33 	%argrw{"wrr"}
+	normalize	___371_R ___366_out 	%line{46} %argrw{"wr"}
+	return
+	trace		$tmp34 P ___371_R $const14 $const13 $const15 tex_radius 	%line{69} %argrw{"wrrrrrr"} %argderivs{1,2}
+	if		$tmp34 66 66 	%argrw{"r"}
+	assign		$tmp35 hits 	%line{71} %argrw{"wr"}
+	add		hits hits $const4 	%argrw{"wrr"}
+	assign		$tmp36 ___370_i 	%line{63} %argrw{"wr"}
+	add		___370_i ___370_i $const4 	%argrw{"wrr"}
+	sub		$tmp37 tex_subdivs hits 	%line{75} %argrw{"wrr"}
+	assign		$tmp38 $tmp37 	%argrw{"wr"}
+	assign		$tmp39 tex_subdivs 	%argrw{"wr"}
+	div		occlusion $tmp38 $tmp39 	%argrw{"wrr"}
+	sub		$tmp40 $const11 occlusion 	%line{77} %argrw{"wrr"}
+	mul		$tmp41 tex_occluded_color $tmp40 	%argrw{"wrr"}
+	mul		$tmp42 tex_unoccluded_color occlusion 	%argrw{"wrr"}
+	add		result $tmp41 $tmp42 	%argrw{"wrr"}
+	end

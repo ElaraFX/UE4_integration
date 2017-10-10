@@ -1,0 +1,2050 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.7.2
+# options: 
+shader max_tiles
+param	int	texBrickType	5		%read{2147483647,-1} %write{2147483647,-1}
+param	int	texPerRow	2		%read{19,919} %write{2147483647,-1}
+param	int	texPerColumn	2		%read{32,927} %write{2147483647,-1}
+param	float	texChangeColumn	1		%read{101,973} %write{2147483647,-1}
+param	float	texChangeRow	1		%read{98,974} %write{2147483647,-1}
+param	int	texUseColumnEdit	0		%read{80,971} %write{2147483647,-1}
+param	int	texUseRowEdit	0		%read{64,968} %write{2147483647,-1}
+param	int	texShowTextureSwatches	1		%read{2147483647,-1} %write{2147483647,-1}
+param	float	texEdgeRoughness	0		%read{124,996} %write{2147483647,-1}
+param	float	texFadeVariance	0.050000001		%read{415,436} %write{2147483647,-1}
+param	int	texLockGapSymmetry	1		%read{2147483647,-1} %write{2147483647,-1}
+param	int	texRandomSeed	76		%read{177,1220} %write{2147483647,-1}
+param	int	texHoles	0		%read{352,1260} %write{2147483647,-1}
+param	float	texRandomShift	0		%read{6,878} %write{2147483647,-1}
+param	float	texLineShift	0.5		%read{198,1070} %write{2147483647,-1}
+param	float	texHorizontalGap	0.5		%read{3,875} %write{2147483647,-1}
+param	float	texVerticalGap	0.5		%read{4,876} %write{2147483647,-1}
+param	float	texColorVariance	0.2		%read{5,877} %write{2147483647,-1}
+param	float	texVerticalCount	4		%read{9,881} %write{2147483647,-1}
+param	float	texHorizontalCount	4		%read{7,879} %write{2147483647,-1}
+param	color	texBrickColor	0 0 0		%read{394,394} %write{2147483647,-1}
+param	color	texMortarColor	0 0 0		%read{396,396} %write{2147483647,-1}
+param	int	MortarMapEnabled	0		%read{398,398} %write{2147483647,-1}
+param	float	MortarMap_alpha	0		%read{400,400} %write{2147483647,-1}
+param	vector	MortarMap_bump	0 0 0		%read{2147483647,-1} %write{2147483647,-1}
+param	color	MortarMap	0 0 0		%read{399,399} %write{2147483647,-1}
+param	int	BrickMapEnabled	0		%read{401,401} %write{2147483647,-1}
+param	float	BrickMap_alpha	0		%read{403,403} %write{2147483647,-1}
+param	vector	BrickMap_bump	0 0 0		%read{2147483647,-1} %write{2147483647,-1}
+param	color	BrickMap	0 0 0		%read{402,402} %write{2147483647,-1}
+param	point	tex_coords	0 0 0		%read{0,0} %write{2147483647,-1} %derivs
+oparam	color	result	0 0 0		%read{2147483647,-1} %write{418,452}
+oparam	vector	result_bump	0 0 0		%read{2147483647,-1} %write{1271,1271}
+oparam	float	result_alpha	1		%read{2147483647,-1} %write{419,453}
+global	vector	dPdu	%read{1266,1266} %write{2147483647,-1}
+global	vector	dPdv	%read{1268,1268} %write{2147483647,-1}
+local	int	___366_n	%read{23,1060} %write{22,1059}
+local	float	___369_mixer	%read{391,1263} %write{2,1262}
+local	float	___369_mortarthicknessx	%read{7,975} %write{3,875}
+local	float	___369_mortarthicknessy	%read{9,976} %write{4,876}
+local	float	___369_brickvary	%read{2147483647,-1} %write{5,877}
+local	float	___369_rowvary	%read{182,1054} %write{6,878}
+local	float	___369_brickwidth	%read{16,1045} %write{8,970}
+local	float	___369_brickheight	%read{12,1046} %write{10,973}
+local	float	___369_c_row	%read{21,922} %write{14,897}
+local	float	___369_c_column	%read{34,930} %write{18,910}
+local	int	___369_r_row	%read{67,939} %write{31,903}
+local	int	___369_r_col	%read{83,955} %write{44,916}
+local	int	___369_ch_r	%read{72,944} %write{45,926}
+local	int	___369_ch_c	%read{88,960} %write{46,934}
+local	float	___369_re	%read{329,1211} %write{63,974}
+local	float	___369_MWF	%read{206,1122} %write{103,975}
+local	float	___369_MHF	%read{265,1181} %write{104,976}
+local	float	___369_numwide	%read{325,1218} %write{105,977}
+local	vector	___369_ns	%read{126,999} %write{106,987}
+local	vector	___369_nv	%read{133,1006} %write{107,995}
+local	float	___369_qk	%read{130,1009} %write{124,996}
+local	float	___369_scoord	%read{153,1045} %write{131,1003}
+local	float	___369_tcoord	%read{156,1046} %write{138,1010}
+local	float	___369_d_u	%read{161,1033} %write{145,1017}
+local	float	___369_d_v	%read{170,1042} %write{152,1024}
+local	float	___369_swidth	%read{171,1123} %write{161,1043}
+local	float	___369_twidth	%read{172,1182} %write{170,1044}
+local	float	___369_ss	%read{183,1110} %write{173,1073}
+local	float	___369_tt	%read{175,1169} %write{174,1074}
+local	float	___369_tbrick	%read{176,1217} %write{175,1047}
+local	float	___369_sbrick	%read{201,1194} %write{200,1072}
+local	float	___369_w	%read{321,1193} %write{203,1133}
+local	float	___369_ht	%read{321,1193} %write{262,1192}
+local	float	___369_sStand	%read{324,1218} %write{322,1200}
+local	float	___369_randPack	%read{2147483647,-1} %write{351,1223}
+local	float	___380_res	%read{363,1254} %write{359,1237}
+local	float	___380_tres	%read{385,1257} %write{360,1256}
+local	point	uv	%read{11,1021} %write{0,872} %derivs
+local	float	randomPack	%read{351,1234} %write{323,1222}
+local	float	mixer	%read{404,1264} %write{391,391}
+local	color	bcolor	%read{417,446} %write{392,441}
+local	float	balpha	%read{419,450} %write{393,433}
+local	color	brickcolor	%read{411,432} %write{394,402}
+local	float	brickalpha	%read{412,433} %write{395,403}
+local	color	mortarcolor	%read{422,445} %write{396,399}
+local	float	mortaralpha	%read{423,449} %write{397,400}
+local	float	___383_val	%read{411,417} %write{406,416}
+local	float	___385_val	%read{429,441} %write{424,440}
+local	color	___385_Ct	%read{452,452} %write{442,447}
+local	float	___385_Ca	%read{453,453} %write{443,451}
+local	float	___386_d_u	%read{469,866} %write{460,460} %derivs
+local	float	___386_d_v	%read{868,1265} %write{467,467} %derivs
+local	float	___386_dfdu	%read{1267,1267} %write{468,866}
+local	float	___386_dfdv	%read{1269,1269} %write{867,1265}
+const	string	$const1	"maxBricksBlockMixerFunc"		%read{1,873} %write{2147483647,-1}
+const	float	$const2	0		%read{2,1262} %write{2147483647,-1}
+const	float	$const3	0.0099999998		%read{3,876} %write{2147483647,-1}
+const	float	$const4	1		%read{8,1257} %write{2147483647,-1}
+temp	float	$tmp1	%read{8,8} %write{7,7}
+temp	float	$tmp2	%read{10,10} %write{9,9}
+temp	float	$tmp3	%read{14,14} %write{13,13}
+const	int	$const5	1		%read{11,1248} %write{2147483647,-1}
+temp	float	$tmp4	%read{12,12} %write{11,11}
+temp	float	$tmp5	%read{13,13} %write{12,12}
+temp	float	$tmp6	%read{18,18} %write{17,17}
+const	int	$const6	0		%read{15,1244} %write{2147483647,-1}
+temp	float	$tmp7	%read{16,16} %write{15,15}
+temp	float	$tmp8	%read{17,17} %write{16,16}
+temp	float	$tmp9	%read{31,31} %write{28,29}
+temp	float	$tmp10	%read{21,28} %write{19,19}
+const	string	$const7	"maxModF"		%read{20,1057} %write{2147483647,-1}
+temp	float	$tmp11	%read{22,22} %write{21,21}
+temp	float	$tmp12	%read{25,25} %write{24,24}
+temp	float	$tmp13	%read{24,24} %write{23,23}
+temp	int	$tmp14	%read{27,27} %write{26,26}
+temp	float	$tmp15	%read{44,44} %write{41,42}
+temp	float	$tmp16	%read{34,41} %write{32,32}
+temp	float	$tmp17	%read{35,35} %write{34,34}
+temp	float	$tmp18	%read{38,38} %write{37,37}
+temp	float	$tmp19	%read{37,37} %write{36,36}
+temp	int	$tmp20	%read{40,40} %write{39,39}
+temp	int	$tmp21	%read{48,48} %write{47,47}
+temp	int	$tmp22	%read{49,53} %write{48,52}
+temp	int	$tmp23	%read{51,51} %write{50,50}
+temp	int	$tmp24	%read{52,52} %write{51,51}
+temp	int	$tmp25	%read{56,56} %write{55,55}
+temp	int	$tmp26	%read{57,61} %write{56,60}
+temp	int	$tmp27	%read{59,59} %write{58,58}
+temp	int	$tmp28	%read{60,60} %write{59,59}
+temp	int	$tmp29	%read{65,65} %write{64,64}
+temp	int	$tmp30	%read{66,70} %write{65,69}
+temp	int	$tmp31	%read{68,68} %write{67,67}
+temp	int	$tmp32	%read{69,69} %write{68,68}
+temp	int	$tmp33	%read{71,74} %write{70,73}
+temp	int	$tmp34	%read{73,73} %write{72,72}
+temp	int	$tmp35	%read{75,79} %write{74,78}
+temp	int	$tmp36	%read{77,77} %write{76,76}
+temp	int	$tmp37	%read{78,78} %write{77,77}
+temp	int	$tmp38	%read{81,81} %write{80,80}
+temp	int	$tmp39	%read{82,86} %write{81,85}
+temp	int	$tmp40	%read{84,84} %write{83,83}
+temp	int	$tmp41	%read{85,85} %write{84,84}
+temp	int	$tmp42	%read{87,90} %write{86,89}
+temp	int	$tmp43	%read{89,89} %write{88,88}
+temp	int	$tmp44	%read{91,95} %write{90,94}
+temp	int	$tmp45	%read{93,93} %write{92,92}
+temp	int	$tmp46	%read{94,94} %write{93,93}
+temp	int	$tmp47	%read{97,97} %write{96,96}
+temp	int	$tmp48	%read{100,100} %write{99,99}
+const	vector	$const8	0 0 0		%read{106,979} %write{2147483647,-1}
+temp	float	$tmp49	%read{110,110} %write{108,108}
+const	float	$const9	17		%read{109,993} %write{2147483647,-1}
+temp	float	$tmp50	%read{110,110} %write{109,109}
+temp	float	$tmp51	%read{111,111} %write{110,110}
+temp	float	$tmp52	%read{114,114} %write{112,112}
+temp	float	$tmp53	%read{114,114} %write{113,113}
+temp	float	$tmp54	%read{115,115} %write{114,114}
+temp	float	$tmp55	%read{118,118} %write{116,116}
+temp	float	$tmp56	%read{118,118} %write{117,117}
+temp	float	$tmp57	%read{119,119} %write{118,118}
+temp	float	$tmp58	%read{122,122} %write{120,120}
+temp	float	$tmp59	%read{122,122} %write{121,121}
+temp	float	$tmp60	%read{123,123} %write{122,122}
+const	float	$const10	0.001		%read{124,996} %write{2147483647,-1}
+temp	float	$tmp61	%read{131,131} %write{125,125}
+temp	float	$tmp62	%read{130,130} %write{129,129}
+temp	float	$tmp63	%read{129,129} %write{126,126}
+temp	float	$tmp64	%read{129,129} %write{127,127}
+const	string	$const11	"maxNoise2"		%read{128,1007} %write{2147483647,-1}
+const	string	$const12	"perlin"		%read{129,1234} %write{2147483647,-1}
+temp	float	$tmp65	%read{131,131} %write{130,130}
+temp	float	$tmp66	%read{138,138} %write{132,132}
+temp	float	$tmp67	%read{137,137} %write{136,136}
+temp	float	$tmp68	%read{136,136} %write{133,133}
+temp	float	$tmp69	%read{136,136} %write{134,134}
+temp	float	$tmp70	%read{138,138} %write{137,137}
+temp	float	$tmp71	%read{145,145} %write{141,141}
+temp	float	$tmp72	%read{141,141} %write{140,140}
+temp	float	$tmp73	%read{140,140} %write{139,139} %derivs
+temp	float	$tmp74	%read{145,145} %write{144,144}
+temp	float	$tmp75	%read{144,144} %write{143,143}
+temp	float	$tmp76	%read{143,143} %write{142,142} %derivs
+temp	float	$tmp77	%read{152,152} %write{148,148}
+temp	float	$tmp78	%read{148,148} %write{147,147}
+temp	float	$tmp79	%read{147,147} %write{146,146} %derivs
+temp	float	$tmp80	%read{152,152} %write{151,151}
+temp	float	$tmp81	%read{151,151} %write{150,150}
+temp	float	$tmp82	%read{150,150} %write{149,149} %derivs
+temp	float	$tmp83	%read{161,161} %write{160,160}
+temp	int	$tmp84	%read{155,155} %write{154,154}
+temp	int	$tmp85	%read{154,154} %write{153,153}
+temp	float	$tmp86	%read{159,159} %write{155,155}
+temp	int	$tmp87	%read{158,158} %write{157,157}
+temp	int	$tmp88	%read{157,157} %write{156,156}
+temp	float	$tmp89	%read{159,159} %write{158,158}
+temp	float	$tmp90	%read{160,160} %write{159,159}
+const	float	$const13	1e-007		%read{160,1041} %write{2147483647,-1}
+temp	float	$tmp91	%read{170,170} %write{169,169}
+temp	int	$tmp92	%read{164,164} %write{163,163}
+temp	int	$tmp93	%read{163,163} %write{162,162}
+temp	float	$tmp94	%read{168,168} %write{164,164}
+temp	int	$tmp95	%read{167,167} %write{166,166}
+temp	int	$tmp96	%read{166,166} %write{165,165}
+temp	float	$tmp97	%read{168,168} %write{167,167}
+temp	float	$tmp98	%read{169,169} %write{168,168}
+temp	float	$tmp99	%read{181,181} %write{180,180}
+const	float	$const14	0.5		%read{176,1222} %write{2147483647,-1}
+temp	float	$tmp100	%read{178,178} %write{176,176}
+temp	float	$tmp101	%read{180,180} %write{178,178}
+temp	float	$tmp102	%read{178,178} %write{177,177}
+const	string	$const15	"maxNoise1"		%read{179,1233} %write{2147483647,-1}
+temp	float	$tmp103	%read{182,182} %write{181,181}
+temp	float	$tmp104	%read{183,183} %write{182,182}
+temp	float	$tmp105	%read{196,196} %write{193,194}
+temp	float	$tmp106	%read{186,194} %write{184,190}
+temp	float	$tmp107	%read{187,187} %write{186,186}
+temp	float	$tmp108	%read{190,190} %write{189,189}
+temp	float	$tmp109	%read{189,189} %write{188,188}
+temp	int	$tmp110	%read{192,192} %write{191,191}
+temp	int	$tmp111	%read{197,197} %write{196,196}
+temp	float	$tmp112	%read{199,199} %write{198,198}
+temp	int	$tmp113	%read{205,205} %write{204,204}
+const	float	$const16	2		%read{206,1181} %write{2147483647,-1}
+temp	float	$tmp114	%read{207,207} %write{206,206}
+temp	float	$tmp115	%read{261,261} %write{228,232}
+temp	float	$tmp116	%read{226,232} %write{216,220}
+temp	float	$tmp117	%read{210,211} %write{208,208}
+const	string	$const17	"maxBoxstep"		%read{209,1168} %write{2147483647,-1}
+temp	float	$tmp118	%read{212,212} %write{210,210}
+temp	float	$tmp119	%read{212,212} %write{211,211}
+temp	float	$tmp120	%read{214,220} %write{212,212}
+const	string	$const18	"maxClamp"		%read{213,1183} %write{2147483647,-1}
+temp	int	$tmp121	%read{215,215} %write{214,214}
+temp	int	$tmp122	%read{218,218} %write{217,217}
+temp	float	$tmp123	%read{226,228} %write{224,224}
+temp	float	$tmp124	%read{223,223} %write{222,222}
+temp	float	$tmp125	%read{224,224} %write{223,223}
+temp	int	$tmp126	%read{227,227} %write{226,226}
+temp	int	$tmp127	%read{230,230} %write{229,229}
+temp	float	$tmp128	%read{261,261} %write{255,259}
+temp	float	$tmp129	%read{253,259} %write{244,248}
+temp	float	$tmp130	%read{235,235} %write{234,234}
+temp	float	$tmp131	%read{238,239} %write{235,235}
+temp	float	$tmp132	%read{239,239} %write{236,236}
+temp	float	$tmp133	%read{240,240} %write{238,238}
+temp	float	$tmp134	%read{240,240} %write{239,239}
+temp	float	$tmp135	%read{242,248} %write{240,240}
+temp	int	$tmp136	%read{243,243} %write{242,242}
+temp	int	$tmp137	%read{246,246} %write{245,245}
+temp	float	$tmp138	%read{251,251} %write{250,250}
+temp	float	$tmp139	%read{256,258} %write{251,251}
+temp	int	$tmp140	%read{254,254} %write{253,253}
+temp	int	$tmp141	%read{257,257} %write{256,256}
+temp	int	$tmp142	%read{264,264} %write{263,263}
+temp	float	$tmp143	%read{266,266} %write{265,265}
+temp	float	$tmp144	%read{320,320} %write{287,291}
+temp	float	$tmp145	%read{285,291} %write{275,279}
+temp	float	$tmp146	%read{269,270} %write{267,267}
+temp	float	$tmp147	%read{271,271} %write{269,269}
+temp	float	$tmp148	%read{271,271} %write{270,270}
+temp	float	$tmp149	%read{273,279} %write{271,271}
+temp	int	$tmp150	%read{274,274} %write{273,273}
+temp	int	$tmp151	%read{277,277} %write{276,276}
+temp	float	$tmp152	%read{285,287} %write{283,283}
+temp	float	$tmp153	%read{282,282} %write{281,281}
+temp	float	$tmp154	%read{283,283} %write{282,282}
+temp	int	$tmp155	%read{286,286} %write{285,285}
+temp	int	$tmp156	%read{289,289} %write{288,288}
+temp	float	$tmp157	%read{320,320} %write{314,318}
+temp	float	$tmp158	%read{312,318} %write{303,307}
+temp	float	$tmp159	%read{294,294} %write{293,293}
+temp	float	$tmp160	%read{297,298} %write{294,294}
+temp	float	$tmp161	%read{298,298} %write{295,295}
+temp	float	$tmp162	%read{299,299} %write{297,297}
+temp	float	$tmp163	%read{299,299} %write{298,298}
+temp	float	$tmp164	%read{301,307} %write{299,299}
+temp	int	$tmp165	%read{302,302} %write{301,301}
+temp	int	$tmp166	%read{305,305} %write{304,304}
+temp	float	$tmp167	%read{310,310} %write{309,309}
+temp	float	$tmp168	%read{315,317} %write{310,310}
+temp	int	$tmp169	%read{313,313} %write{312,312}
+temp	int	$tmp170	%read{316,316} %write{315,315}
+temp	int	$tmp171	%read{326,326} %write{324,324}
+temp	int	$tmp172	%read{326,326} %write{325,325}
+temp	int	$tmp173	%read{327,327} %write{326,326}
+temp	int	$tmp174	%read{330,330} %write{329,329}
+temp	int	$tmp175	%read{331,336} %write{330,335}
+temp	float	$tmp176	%read{333,333} %write{332,332}
+temp	int	$tmp177	%read{334,334} %write{333,333}
+temp	int	$tmp178	%read{335,335} %write{334,334}
+temp	float	$tmp179	%read{341,341} %write{337,337}
+temp	float	$tmp180	%read{340,340} %write{338,338}
+temp	float	$tmp181	%read{340,340} %write{339,339}
+temp	float	$tmp182	%read{341,341} %write{340,340}
+temp	float	$tmp183	%read{343,343} %write{341,341}
+temp	float	$tmp184	%read{344,344} %write{343,343}
+temp	float	$tmp185	%read{343,343} %write{342,342}
+temp	float	$tmp186	%read{347,347} %write{345,345}
+temp	float	$tmp187	%read{347,347} %write{346,346}
+temp	float	$tmp188	%read{349,349} %write{347,347}
+temp	float	$tmp189	%read{350,350} %write{349,349}
+temp	float	$tmp190	%read{349,349} %write{348,348}
+temp	int	$tmp191	%read{353,353} %write{352,352}
+temp	int	$tmp192	%read{354,358} %write{353,357}
+const	int	$const19	100		%read{355,1260} %write{2147483647,-1}
+temp	int	$tmp193	%read{356,356} %write{355,355}
+temp	int	$tmp194	%read{357,357} %write{356,356}
+temp	int	$tmp195	%read{364,364} %write{363,363}
+temp	float	$tmp196	%read{368,368} %write{367,367}
+temp	float	$tmp197	%read{367,367} %write{366,366}
+temp	float	$tmp198	%read{374,383} %write{368,368}
+const	string	$const20	"maxThreshold"		%read{369,1241} %write{2147483647,-1}
+temp	int	$tmp199	%read{371,371} %write{370,370}
+temp	int	$tmp200	%read{375,375} %write{374,374}
+temp	int	$tmp201	%read{379,379} %write{378,378}
+temp	float	$tmp202	%read{384,384} %write{382,382}
+temp	float	$tmp203	%read{384,384} %write{383,383}
+temp	int	$tmp204	%read{386,386} %write{385,385}
+temp	int	$tmp205	%read{389,389} %write{388,388}
+const	color	$const21	0 0 0		%read{392,442} %write{2147483647,-1}
+temp	int	$tmp206	%read{405,405} %write{404,404}
+temp	float	$tmp207	%read{409,409} %write{408,408}
+temp	float	$tmp208	%read{410,410} %write{409,409}
+temp	float	$tmp209	%read{415,415} %write{414,414}
+temp	float	$tmp210	%read{416,416} %write{415,415}
+temp	int	$tmp211	%read{421,421} %write{420,420}
+temp	float	$tmp212	%read{427,427} %write{426,426}
+temp	float	$tmp213	%read{428,428} %write{427,427}
+temp	int	$tmp214	%read{430,430} %write{429,429}
+temp	float	$tmp215	%read{436,436} %write{435,435}
+temp	float	$tmp216	%read{437,437} %write{436,436}
+temp	int	$tmp217	%read{439,439} %write{438,438}
+temp	float	$tmp218	%read{445,445} %write{444,444}
+temp	color	$tmp219	%read{447,447} %write{445,445}
+temp	color	$tmp220	%read{447,447} %write{446,446}
+temp	float	$tmp221	%read{449,449} %write{448,448}
+temp	float	$tmp222	%read{451,451} %write{449,449}
+temp	float	$tmp223	%read{451,451} %write{450,450}
+temp	float	$tmp224	%read{460,460} %write{456,456} %derivs
+temp	float	$tmp225	%read{456,456} %write{455,455} %derivs
+temp	float	$tmp226	%read{455,455} %write{454,454} %derivs
+temp	float	$tmp227	%read{460,460} %write{459,459} %derivs
+temp	float	$tmp228	%read{459,459} %write{458,458} %derivs
+temp	float	$tmp229	%read{458,458} %write{457,457} %derivs
+temp	float	$tmp230	%read{467,467} %write{463,463} %derivs
+temp	float	$tmp231	%read{463,463} %write{462,462} %derivs
+temp	float	$tmp232	%read{462,462} %write{461,461} %derivs
+temp	float	$tmp233	%read{467,467} %write{466,466} %derivs
+temp	float	$tmp234	%read{466,466} %write{465,465} %derivs
+temp	float	$tmp235	%read{465,465} %write{464,464} %derivs
+temp	int	$tmp236	%read{470,470} %write{469,469}
+temp	float	$tmp237	%read{472,472} %write{471,471} %derivs
+temp	float	$tmp238	%read{473,473} %write{472,472} %derivs
+temp	float	$tmp239	%read{865,865} %write{864,864}
+temp	float	$tmp240	%read{481,481} %write{480,480}
+temp	float	$tmp241	%read{483,483} %write{482,482}
+temp	float	$tmp242	%read{487,487} %write{486,486}
+temp	float	$tmp243	%read{485,485} %write{484,484}
+temp	float	$tmp244	%read{486,486} %write{485,485}
+temp	float	$tmp245	%read{491,491} %write{490,490}
+temp	float	$tmp246	%read{489,489} %write{488,488}
+temp	float	$tmp247	%read{490,490} %write{489,489}
+temp	float	$tmp248	%read{504,504} %write{501,502}
+temp	float	$tmp249	%read{494,501} %write{492,492}
+temp	float	$tmp250	%read{495,495} %write{494,494}
+temp	float	$tmp251	%read{498,498} %write{497,497}
+temp	float	$tmp252	%read{497,497} %write{496,496}
+temp	int	$tmp253	%read{500,500} %write{499,499}
+temp	float	$tmp254	%read{517,517} %write{514,515}
+temp	float	$tmp255	%read{507,514} %write{505,505}
+temp	float	$tmp256	%read{508,508} %write{507,507}
+temp	float	$tmp257	%read{511,511} %write{510,510}
+temp	float	$tmp258	%read{510,510} %write{509,509}
+temp	int	$tmp259	%read{513,513} %write{512,512}
+temp	int	$tmp260	%read{521,521} %write{520,520}
+temp	int	$tmp261	%read{522,526} %write{521,525}
+temp	int	$tmp262	%read{524,524} %write{523,523}
+temp	int	$tmp263	%read{525,525} %write{524,524}
+temp	int	$tmp264	%read{529,529} %write{528,528}
+temp	int	$tmp265	%read{530,534} %write{529,533}
+temp	int	$tmp266	%read{532,532} %write{531,531}
+temp	int	$tmp267	%read{533,533} %write{532,532}
+temp	int	$tmp268	%read{538,538} %write{537,537}
+temp	int	$tmp269	%read{539,543} %write{538,542}
+temp	int	$tmp270	%read{541,541} %write{540,540}
+temp	int	$tmp271	%read{542,542} %write{541,541}
+temp	int	$tmp272	%read{544,547} %write{543,546}
+temp	int	$tmp273	%read{546,546} %write{545,545}
+temp	int	$tmp274	%read{548,552} %write{547,551}
+temp	int	$tmp275	%read{550,550} %write{549,549}
+temp	int	$tmp276	%read{551,551} %write{550,550}
+temp	int	$tmp277	%read{554,554} %write{553,553}
+temp	int	$tmp278	%read{555,559} %write{554,558}
+temp	int	$tmp279	%read{557,557} %write{556,556}
+temp	int	$tmp280	%read{558,558} %write{557,557}
+temp	int	$tmp281	%read{560,563} %write{559,562}
+temp	int	$tmp282	%read{562,562} %write{561,561}
+temp	int	$tmp283	%read{564,568} %write{563,567}
+temp	int	$tmp284	%read{566,566} %write{565,565}
+temp	int	$tmp285	%read{567,567} %write{566,566}
+temp	int	$tmp286	%read{570,570} %write{569,569}
+temp	int	$tmp287	%read{573,573} %write{572,572}
+temp	float	$tmp288	%read{583,583} %write{581,581}
+temp	float	$tmp289	%read{583,583} %write{582,582}
+temp	float	$tmp290	%read{584,584} %write{583,583}
+temp	float	$tmp291	%read{587,587} %write{585,585}
+temp	float	$tmp292	%read{587,587} %write{586,586}
+temp	float	$tmp293	%read{588,588} %write{587,587}
+temp	float	$tmp294	%read{591,591} %write{589,589}
+temp	float	$tmp295	%read{591,591} %write{590,590}
+temp	float	$tmp296	%read{592,592} %write{591,591}
+temp	float	$tmp297	%read{595,595} %write{593,593}
+temp	float	$tmp298	%read{595,595} %write{594,594}
+temp	float	$tmp299	%read{596,596} %write{595,595}
+temp	float	$tmp300	%read{604,604} %write{598,598}
+temp	float	$tmp301	%read{603,603} %write{602,602}
+temp	float	$tmp302	%read{602,602} %write{599,599}
+temp	float	$tmp303	%read{602,602} %write{600,600}
+temp	float	$tmp304	%read{604,604} %write{603,603}
+temp	float	$tmp305	%read{611,611} %write{605,605}
+temp	float	$tmp306	%read{610,610} %write{609,609}
+temp	float	$tmp307	%read{609,609} %write{606,606}
+temp	float	$tmp308	%read{609,609} %write{607,607}
+temp	float	$tmp309	%read{611,611} %write{610,610}
+temp	float	$tmp310	%read{618,618} %write{614,614}
+temp	float	$tmp311	%read{614,614} %write{613,613}
+temp	float	$tmp312	%read{613,613} %write{612,612} %derivs
+temp	float	$tmp313	%read{618,618} %write{617,617}
+temp	float	$tmp314	%read{617,617} %write{616,616}
+temp	float	$tmp315	%read{616,616} %write{615,615} %derivs
+temp	float	$tmp316	%read{625,625} %write{621,621}
+temp	float	$tmp317	%read{621,621} %write{620,620}
+temp	float	$tmp318	%read{620,620} %write{619,619} %derivs
+temp	float	$tmp319	%read{625,625} %write{624,624}
+temp	float	$tmp320	%read{624,624} %write{623,623}
+temp	float	$tmp321	%read{623,623} %write{622,622} %derivs
+temp	float	$tmp322	%read{634,634} %write{633,633}
+temp	int	$tmp323	%read{628,628} %write{627,627}
+temp	int	$tmp324	%read{627,627} %write{626,626}
+temp	float	$tmp325	%read{632,632} %write{628,628}
+temp	int	$tmp326	%read{631,631} %write{630,630}
+temp	int	$tmp327	%read{630,630} %write{629,629}
+temp	float	$tmp328	%read{632,632} %write{631,631}
+temp	float	$tmp329	%read{633,633} %write{632,632}
+temp	float	$tmp330	%read{643,643} %write{642,642}
+temp	int	$tmp331	%read{637,637} %write{636,636}
+temp	int	$tmp332	%read{636,636} %write{635,635}
+temp	float	$tmp333	%read{641,641} %write{637,637}
+temp	int	$tmp334	%read{640,640} %write{639,639}
+temp	int	$tmp335	%read{639,639} %write{638,638}
+temp	float	$tmp336	%read{641,641} %write{640,640}
+temp	float	$tmp337	%read{642,642} %write{641,641}
+temp	float	$tmp338	%read{654,654} %write{653,653}
+temp	float	$tmp339	%read{651,651} %write{649,649}
+temp	float	$tmp340	%read{653,653} %write{651,651}
+temp	float	$tmp341	%read{651,651} %write{650,650}
+temp	float	$tmp342	%read{655,655} %write{654,654}
+temp	float	$tmp343	%read{656,656} %write{655,655}
+temp	float	$tmp344	%read{669,669} %write{666,667}
+temp	float	$tmp345	%read{659,667} %write{657,663}
+temp	float	$tmp346	%read{660,660} %write{659,659}
+temp	float	$tmp347	%read{663,663} %write{662,662}
+temp	float	$tmp348	%read{662,662} %write{661,661}
+temp	int	$tmp349	%read{665,665} %write{664,664}
+temp	int	$tmp350	%read{670,670} %write{669,669}
+temp	float	$tmp351	%read{672,672} %write{671,671}
+temp	int	$tmp352	%read{678,678} %write{677,677}
+temp	float	$tmp353	%read{680,680} %write{679,679}
+temp	float	$tmp354	%read{734,734} %write{701,705}
+temp	float	$tmp355	%read{699,705} %write{689,693}
+temp	float	$tmp356	%read{683,684} %write{681,681}
+temp	float	$tmp357	%read{685,685} %write{683,683}
+temp	float	$tmp358	%read{685,685} %write{684,684}
+temp	float	$tmp359	%read{687,693} %write{685,685}
+temp	int	$tmp360	%read{688,688} %write{687,687}
+temp	int	$tmp361	%read{691,691} %write{690,690}
+temp	float	$tmp362	%read{699,701} %write{697,697}
+temp	float	$tmp363	%read{696,696} %write{695,695}
+temp	float	$tmp364	%read{697,697} %write{696,696}
+temp	int	$tmp365	%read{700,700} %write{699,699}
+temp	int	$tmp366	%read{703,703} %write{702,702}
+temp	float	$tmp367	%read{734,734} %write{728,732}
+temp	float	$tmp368	%read{726,732} %write{717,721}
+temp	float	$tmp369	%read{708,708} %write{707,707}
+temp	float	$tmp370	%read{711,712} %write{708,708}
+temp	float	$tmp371	%read{712,712} %write{709,709}
+temp	float	$tmp372	%read{713,713} %write{711,711}
+temp	float	$tmp373	%read{713,713} %write{712,712}
+temp	float	$tmp374	%read{715,721} %write{713,713}
+temp	int	$tmp375	%read{716,716} %write{715,715}
+temp	int	$tmp376	%read{719,719} %write{718,718}
+temp	float	$tmp377	%read{724,724} %write{723,723}
+temp	float	$tmp378	%read{729,731} %write{724,724}
+temp	int	$tmp379	%read{727,727} %write{726,726}
+temp	int	$tmp380	%read{730,730} %write{729,729}
+temp	int	$tmp381	%read{737,737} %write{736,736}
+temp	float	$tmp382	%read{739,739} %write{738,738}
+temp	float	$tmp383	%read{793,793} %write{760,764}
+temp	float	$tmp384	%read{758,764} %write{748,752}
+temp	float	$tmp385	%read{742,743} %write{740,740}
+temp	float	$tmp386	%read{744,744} %write{742,742}
+temp	float	$tmp387	%read{744,744} %write{743,743}
+temp	float	$tmp388	%read{746,752} %write{744,744}
+temp	int	$tmp389	%read{747,747} %write{746,746}
+temp	int	$tmp390	%read{750,750} %write{749,749}
+temp	float	$tmp391	%read{758,760} %write{756,756}
+temp	float	$tmp392	%read{755,755} %write{754,754}
+temp	float	$tmp393	%read{756,756} %write{755,755}
+temp	int	$tmp394	%read{759,759} %write{758,758}
+temp	int	$tmp395	%read{762,762} %write{761,761}
+temp	float	$tmp396	%read{793,793} %write{787,791}
+temp	float	$tmp397	%read{785,791} %write{776,780}
+temp	float	$tmp398	%read{767,767} %write{766,766}
+temp	float	$tmp399	%read{770,771} %write{767,767}
+temp	float	$tmp400	%read{771,771} %write{768,768}
+temp	float	$tmp401	%read{772,772} %write{770,770}
+temp	float	$tmp402	%read{772,772} %write{771,771}
+temp	float	$tmp403	%read{774,780} %write{772,772}
+temp	int	$tmp404	%read{775,775} %write{774,774}
+temp	int	$tmp405	%read{778,778} %write{777,777}
+temp	float	$tmp406	%read{783,783} %write{782,782}
+temp	float	$tmp407	%read{788,790} %write{783,783}
+temp	int	$tmp408	%read{786,786} %write{785,785}
+temp	int	$tmp409	%read{789,789} %write{788,788}
+temp	int	$tmp410	%read{799,799} %write{797,797}
+temp	int	$tmp411	%read{799,799} %write{798,798}
+temp	int	$tmp412	%read{800,800} %write{799,799}
+temp	int	$tmp413	%read{803,803} %write{802,802}
+temp	int	$tmp414	%read{804,809} %write{803,808}
+temp	float	$tmp415	%read{806,806} %write{805,805}
+temp	int	$tmp416	%read{807,807} %write{806,806}
+temp	int	$tmp417	%read{808,808} %write{807,807}
+temp	float	$tmp418	%read{814,814} %write{810,810}
+temp	float	$tmp419	%read{813,813} %write{811,811}
+temp	float	$tmp420	%read{813,813} %write{812,812}
+temp	float	$tmp421	%read{814,814} %write{813,813}
+temp	float	$tmp422	%read{816,816} %write{814,814}
+temp	float	$tmp423	%read{817,817} %write{816,816}
+temp	float	$tmp424	%read{816,816} %write{815,815}
+temp	float	$tmp425	%read{820,820} %write{818,818}
+temp	float	$tmp426	%read{820,820} %write{819,819}
+temp	float	$tmp427	%read{822,822} %write{820,820}
+temp	float	$tmp428	%read{823,823} %write{822,822}
+temp	float	$tmp429	%read{822,822} %write{821,821}
+temp	int	$tmp430	%read{826,826} %write{825,825}
+temp	int	$tmp431	%read{827,831} %write{826,830}
+temp	int	$tmp432	%read{829,829} %write{828,828}
+temp	int	$tmp433	%read{830,830} %write{829,829}
+temp	int	$tmp434	%read{837,837} %write{836,836}
+temp	float	$tmp435	%read{841,841} %write{840,840}
+temp	float	$tmp436	%read{840,840} %write{839,839}
+temp	float	$tmp437	%read{847,856} %write{841,841}
+temp	int	$tmp438	%read{844,844} %write{843,843}
+temp	int	$tmp439	%read{848,848} %write{847,847}
+temp	int	$tmp440	%read{852,852} %write{851,851}
+temp	float	$tmp441	%read{857,857} %write{855,855}
+temp	float	$tmp442	%read{857,857} %write{856,856}
+temp	int	$tmp443	%read{859,859} %write{858,858}
+temp	int	$tmp444	%read{862,862} %write{861,861}
+temp	float	$tmp445	%read{866,866} %write{865,865}
+temp	int	$tmp446	%read{869,869} %write{868,868}
+temp	float	$tmp447	%read{871,871} %write{870,870} %derivs
+temp	float	$tmp448	%read{872,872} %write{871,871} %derivs
+temp	float	$tmp449	%read{1264,1264} %write{1263,1263}
+temp	float	$tmp450	%read{880,880} %write{879,879}
+temp	float	$tmp451	%read{882,882} %write{881,881}
+temp	float	$tmp452	%read{886,886} %write{885,885}
+temp	float	$tmp453	%read{884,884} %write{883,883}
+temp	float	$tmp454	%read{885,885} %write{884,884}
+temp	float	$tmp455	%read{890,890} %write{889,889}
+temp	float	$tmp456	%read{888,888} %write{887,887}
+temp	float	$tmp457	%read{889,889} %write{888,888}
+temp	float	$tmp458	%read{903,903} %write{900,901}
+temp	float	$tmp459	%read{893,900} %write{891,891}
+temp	float	$tmp460	%read{894,894} %write{893,893}
+temp	float	$tmp461	%read{897,897} %write{896,896}
+temp	float	$tmp462	%read{896,896} %write{895,895}
+temp	int	$tmp463	%read{899,899} %write{898,898}
+temp	float	$tmp464	%read{916,916} %write{913,914}
+temp	float	$tmp465	%read{906,913} %write{904,904}
+temp	float	$tmp466	%read{907,907} %write{906,906}
+temp	float	$tmp467	%read{910,910} %write{909,909}
+temp	float	$tmp468	%read{909,909} %write{908,908}
+temp	int	$tmp469	%read{912,912} %write{911,911}
+temp	int	$tmp470	%read{920,920} %write{919,919}
+temp	int	$tmp471	%read{921,925} %write{920,924}
+temp	int	$tmp472	%read{923,923} %write{922,922}
+temp	int	$tmp473	%read{924,924} %write{923,923}
+temp	int	$tmp474	%read{928,928} %write{927,927}
+temp	int	$tmp475	%read{929,933} %write{928,932}
+temp	int	$tmp476	%read{931,931} %write{930,930}
+temp	int	$tmp477	%read{932,932} %write{931,931}
+temp	int	$tmp478	%read{937,937} %write{936,936}
+temp	int	$tmp479	%read{938,942} %write{937,941}
+temp	int	$tmp480	%read{940,940} %write{939,939}
+temp	int	$tmp481	%read{941,941} %write{940,940}
+temp	int	$tmp482	%read{943,946} %write{942,945}
+temp	int	$tmp483	%read{945,945} %write{944,944}
+temp	int	$tmp484	%read{947,951} %write{946,950}
+temp	int	$tmp485	%read{949,949} %write{948,948}
+temp	int	$tmp486	%read{950,950} %write{949,949}
+temp	int	$tmp487	%read{953,953} %write{952,952}
+temp	int	$tmp488	%read{954,958} %write{953,957}
+temp	int	$tmp489	%read{956,956} %write{955,955}
+temp	int	$tmp490	%read{957,957} %write{956,956}
+temp	int	$tmp491	%read{959,962} %write{958,961}
+temp	int	$tmp492	%read{961,961} %write{960,960}
+temp	int	$tmp493	%read{963,967} %write{962,966}
+temp	int	$tmp494	%read{965,965} %write{964,964}
+temp	int	$tmp495	%read{966,966} %write{965,965}
+temp	int	$tmp496	%read{969,969} %write{968,968}
+temp	int	$tmp497	%read{972,972} %write{971,971}
+temp	float	$tmp498	%read{982,982} %write{980,980}
+temp	float	$tmp499	%read{982,982} %write{981,981}
+temp	float	$tmp500	%read{983,983} %write{982,982}
+temp	float	$tmp501	%read{986,986} %write{984,984}
+temp	float	$tmp502	%read{986,986} %write{985,985}
+temp	float	$tmp503	%read{987,987} %write{986,986}
+temp	float	$tmp504	%read{990,990} %write{988,988}
+temp	float	$tmp505	%read{990,990} %write{989,989}
+temp	float	$tmp506	%read{991,991} %write{990,990}
+temp	float	$tmp507	%read{994,994} %write{992,992}
+temp	float	$tmp508	%read{994,994} %write{993,993}
+temp	float	$tmp509	%read{995,995} %write{994,994}
+temp	float	$tmp510	%read{1003,1003} %write{997,997}
+temp	float	$tmp511	%read{1002,1002} %write{1001,1001}
+temp	float	$tmp512	%read{1001,1001} %write{998,998}
+temp	float	$tmp513	%read{1001,1001} %write{999,999}
+temp	float	$tmp514	%read{1003,1003} %write{1002,1002}
+temp	float	$tmp515	%read{1010,1010} %write{1004,1004}
+temp	float	$tmp516	%read{1009,1009} %write{1008,1008}
+temp	float	$tmp517	%read{1008,1008} %write{1005,1005}
+temp	float	$tmp518	%read{1008,1008} %write{1006,1006}
+temp	float	$tmp519	%read{1010,1010} %write{1009,1009}
+temp	float	$tmp520	%read{1017,1017} %write{1013,1013}
+temp	float	$tmp521	%read{1013,1013} %write{1012,1012}
+temp	float	$tmp522	%read{1012,1012} %write{1011,1011} %derivs
+temp	float	$tmp523	%read{1017,1017} %write{1016,1016}
+temp	float	$tmp524	%read{1016,1016} %write{1015,1015}
+temp	float	$tmp525	%read{1015,1015} %write{1014,1014} %derivs
+temp	float	$tmp526	%read{1024,1024} %write{1020,1020}
+temp	float	$tmp527	%read{1020,1020} %write{1019,1019}
+temp	float	$tmp528	%read{1019,1019} %write{1018,1018} %derivs
+temp	float	$tmp529	%read{1024,1024} %write{1023,1023}
+temp	float	$tmp530	%read{1023,1023} %write{1022,1022}
+temp	float	$tmp531	%read{1022,1022} %write{1021,1021} %derivs
+temp	float	$tmp532	%read{1033,1033} %write{1032,1032}
+temp	int	$tmp533	%read{1027,1027} %write{1026,1026}
+temp	int	$tmp534	%read{1026,1026} %write{1025,1025}
+temp	float	$tmp535	%read{1031,1031} %write{1027,1027}
+temp	int	$tmp536	%read{1030,1030} %write{1029,1029}
+temp	int	$tmp537	%read{1029,1029} %write{1028,1028}
+temp	float	$tmp538	%read{1031,1031} %write{1030,1030}
+temp	float	$tmp539	%read{1032,1032} %write{1031,1031}
+temp	float	$tmp540	%read{1042,1042} %write{1041,1041}
+temp	int	$tmp541	%read{1036,1036} %write{1035,1035}
+temp	int	$tmp542	%read{1035,1035} %write{1034,1034}
+temp	float	$tmp543	%read{1040,1040} %write{1036,1036}
+temp	int	$tmp544	%read{1039,1039} %write{1038,1038}
+temp	int	$tmp545	%read{1038,1038} %write{1037,1037}
+temp	float	$tmp546	%read{1040,1040} %write{1039,1039}
+temp	float	$tmp547	%read{1041,1041} %write{1040,1040}
+temp	float	$tmp548	%read{1053,1053} %write{1052,1052}
+temp	float	$tmp549	%read{1050,1050} %write{1048,1048}
+temp	float	$tmp550	%read{1052,1052} %write{1050,1050}
+temp	float	$tmp551	%read{1050,1050} %write{1049,1049}
+temp	float	$tmp552	%read{1054,1054} %write{1053,1053}
+temp	float	$tmp553	%read{1055,1055} %write{1054,1054}
+temp	float	$tmp554	%read{1068,1068} %write{1065,1066}
+temp	float	$tmp555	%read{1058,1066} %write{1056,1062}
+temp	float	$tmp556	%read{1059,1059} %write{1058,1058}
+temp	float	$tmp557	%read{1062,1062} %write{1061,1061}
+temp	float	$tmp558	%read{1061,1061} %write{1060,1060}
+temp	int	$tmp559	%read{1064,1064} %write{1063,1063}
+temp	int	$tmp560	%read{1069,1069} %write{1068,1068}
+temp	float	$tmp561	%read{1071,1071} %write{1070,1070}
+temp	int	$tmp562	%read{1077,1077} %write{1076,1076}
+temp	float	$tmp563	%read{1079,1079} %write{1078,1078}
+temp	float	$tmp564	%read{1133,1133} %write{1100,1104}
+temp	float	$tmp565	%read{1098,1104} %write{1088,1092}
+temp	float	$tmp566	%read{1082,1083} %write{1080,1080}
+temp	float	$tmp567	%read{1084,1084} %write{1082,1082}
+temp	float	$tmp568	%read{1084,1084} %write{1083,1083}
+temp	float	$tmp569	%read{1086,1092} %write{1084,1084}
+temp	int	$tmp570	%read{1087,1087} %write{1086,1086}
+temp	int	$tmp571	%read{1090,1090} %write{1089,1089}
+temp	float	$tmp572	%read{1098,1100} %write{1096,1096}
+temp	float	$tmp573	%read{1095,1095} %write{1094,1094}
+temp	float	$tmp574	%read{1096,1096} %write{1095,1095}
+temp	int	$tmp575	%read{1099,1099} %write{1098,1098}
+temp	int	$tmp576	%read{1102,1102} %write{1101,1101}
+temp	float	$tmp577	%read{1133,1133} %write{1127,1131}
+temp	float	$tmp578	%read{1125,1131} %write{1116,1120}
+temp	float	$tmp579	%read{1107,1107} %write{1106,1106}
+temp	float	$tmp580	%read{1110,1111} %write{1107,1107}
+temp	float	$tmp581	%read{1111,1111} %write{1108,1108}
+temp	float	$tmp582	%read{1112,1112} %write{1110,1110}
+temp	float	$tmp583	%read{1112,1112} %write{1111,1111}
+temp	float	$tmp584	%read{1114,1120} %write{1112,1112}
+temp	int	$tmp585	%read{1115,1115} %write{1114,1114}
+temp	int	$tmp586	%read{1118,1118} %write{1117,1117}
+temp	float	$tmp587	%read{1123,1123} %write{1122,1122}
+temp	float	$tmp588	%read{1128,1130} %write{1123,1123}
+temp	int	$tmp589	%read{1126,1126} %write{1125,1125}
+temp	int	$tmp590	%read{1129,1129} %write{1128,1128}
+temp	int	$tmp591	%read{1136,1136} %write{1135,1135}
+temp	float	$tmp592	%read{1138,1138} %write{1137,1137}
+temp	float	$tmp593	%read{1192,1192} %write{1159,1163}
+temp	float	$tmp594	%read{1157,1163} %write{1147,1151}
+temp	float	$tmp595	%read{1141,1142} %write{1139,1139}
+temp	float	$tmp596	%read{1143,1143} %write{1141,1141}
+temp	float	$tmp597	%read{1143,1143} %write{1142,1142}
+temp	float	$tmp598	%read{1145,1151} %write{1143,1143}
+temp	int	$tmp599	%read{1146,1146} %write{1145,1145}
+temp	int	$tmp600	%read{1149,1149} %write{1148,1148}
+temp	float	$tmp601	%read{1157,1159} %write{1155,1155}
+temp	float	$tmp602	%read{1154,1154} %write{1153,1153}
+temp	float	$tmp603	%read{1155,1155} %write{1154,1154}
+temp	int	$tmp604	%read{1158,1158} %write{1157,1157}
+temp	int	$tmp605	%read{1161,1161} %write{1160,1160}
+temp	float	$tmp606	%read{1192,1192} %write{1186,1190}
+temp	float	$tmp607	%read{1184,1190} %write{1175,1179}
+temp	float	$tmp608	%read{1166,1166} %write{1165,1165}
+temp	float	$tmp609	%read{1169,1170} %write{1166,1166}
+temp	float	$tmp610	%read{1170,1170} %write{1167,1167}
+temp	float	$tmp611	%read{1171,1171} %write{1169,1169}
+temp	float	$tmp612	%read{1171,1171} %write{1170,1170}
+temp	float	$tmp613	%read{1173,1179} %write{1171,1171}
+temp	int	$tmp614	%read{1174,1174} %write{1173,1173}
+temp	int	$tmp615	%read{1177,1177} %write{1176,1176}
+temp	float	$tmp616	%read{1182,1182} %write{1181,1181}
+temp	float	$tmp617	%read{1187,1189} %write{1182,1182}
+temp	int	$tmp618	%read{1185,1185} %write{1184,1184}
+temp	int	$tmp619	%read{1188,1188} %write{1187,1187}
+temp	int	$tmp620	%read{1198,1198} %write{1196,1196}
+temp	int	$tmp621	%read{1198,1198} %write{1197,1197}
+temp	int	$tmp622	%read{1199,1199} %write{1198,1198}
+temp	int	$tmp623	%read{1202,1202} %write{1201,1201}
+temp	int	$tmp624	%read{1203,1208} %write{1202,1207}
+temp	float	$tmp625	%read{1205,1205} %write{1204,1204}
+temp	int	$tmp626	%read{1206,1206} %write{1205,1205}
+temp	int	$tmp627	%read{1207,1207} %write{1206,1206}
+temp	float	$tmp628	%read{1213,1213} %write{1209,1209}
+temp	float	$tmp629	%read{1212,1212} %write{1210,1210}
+temp	float	$tmp630	%read{1212,1212} %write{1211,1211}
+temp	float	$tmp631	%read{1213,1213} %write{1212,1212}
+temp	float	$tmp632	%read{1215,1215} %write{1213,1213}
+temp	float	$tmp633	%read{1216,1216} %write{1215,1215}
+temp	float	$tmp634	%read{1215,1215} %write{1214,1214}
+temp	float	$tmp635	%read{1219,1219} %write{1217,1217}
+temp	float	$tmp636	%read{1219,1219} %write{1218,1218}
+temp	float	$tmp637	%read{1221,1221} %write{1219,1219}
+temp	float	$tmp638	%read{1222,1222} %write{1221,1221}
+temp	float	$tmp639	%read{1221,1221} %write{1220,1220}
+temp	int	$tmp640	%read{1225,1225} %write{1224,1224}
+temp	int	$tmp641	%read{1226,1230} %write{1225,1229}
+temp	int	$tmp642	%read{1228,1228} %write{1227,1227}
+temp	int	$tmp643	%read{1229,1229} %write{1228,1228}
+temp	int	$tmp644	%read{1236,1236} %write{1235,1235}
+temp	float	$tmp645	%read{1240,1240} %write{1239,1239}
+temp	float	$tmp646	%read{1239,1239} %write{1238,1238}
+temp	float	$tmp647	%read{1246,1255} %write{1240,1240}
+temp	int	$tmp648	%read{1243,1243} %write{1242,1242}
+temp	int	$tmp649	%read{1247,1247} %write{1246,1246}
+temp	int	$tmp650	%read{1251,1251} %write{1250,1250}
+temp	float	$tmp651	%read{1256,1256} %write{1254,1254}
+temp	float	$tmp652	%read{1256,1256} %write{1255,1255}
+temp	int	$tmp653	%read{1258,1258} %write{1257,1257}
+temp	int	$tmp654	%read{1261,1261} %write{1260,1260}
+temp	float	$tmp655	%read{1265,1265} %write{1264,1264}
+const	float	$const22	0.30000001		%read{1271,1271} %write{2147483647,-1}
+temp	vector	$tmp656	%read{1267,1267} %write{1266,1266}
+temp	vector	$tmp657	%read{1270,1270} %write{1267,1267}
+temp	vector	$tmp658	%read{1269,1269} %write{1268,1268}
+temp	vector	$tmp659	%read{1270,1270} %write{1269,1269}
+temp	vector	$tmp660	%read{1271,1271} %write{1270,1270}
+code ___main___
+	assign		uv tex_coords 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{207} %argrw{"wr"}
+	functioncall	$const1 392 	%line{231} %argrw{"r"}
+	assign		___369_mixer $const2 	%line{59} %argrw{"wr"}
+	mul		___369_mortarthicknessx texHorizontalGap $const3 	%line{60} %argrw{"wrr"}
+	mul		___369_mortarthicknessy texVerticalGap $const3 	%line{61} %argrw{"wrr"}
+	assign		___369_brickvary texColorVariance 	%line{62} %argrw{"wr"}
+	assign		___369_rowvary texRandomShift 	%line{63} %argrw{"wr"}
+	add		$tmp1 texHorizontalCount ___369_mortarthicknessx 	%line{64} %argrw{"wrr"}
+	div		___369_brickwidth $const4 $tmp1 	%argrw{"wrr"}
+	add		$tmp2 texVerticalCount ___369_mortarthicknessy 	%line{65} %argrw{"wrr"}
+	div		___369_brickheight $const4 $tmp2 	%argrw{"wrr"}
+	compref		$tmp4 uv $const5 	%line{66} %argrw{"wrr"}
+	div		$tmp5 $tmp4 ___369_brickheight 	%argrw{"wrr"}
+	floor		$tmp3 $tmp5 	%argrw{"wr"}
+	add		___369_c_row $tmp3 $const4 	%argrw{"wrr"}
+	compref		$tmp7 uv $const6 	%line{67} %argrw{"wrr"}
+	div		$tmp8 $tmp7 ___369_brickwidth 	%argrw{"wrr"}
+	floor		$tmp6 $tmp8 	%argrw{"wr"}
+	add		___369_c_column $tmp6 $const4 	%argrw{"wrr"}
+	assign		$tmp10 texPerRow 	%line{68} %argrw{"wr"}
+	functioncall	$const7 31 	%argrw{"r"}
+	div		$tmp11 ___369_c_row $tmp10 	%line{22} %argrw{"wrr"}
+	assign		___366_n $tmp11 	%argrw{"wr"}
+	assign		$tmp13 ___366_n 	%line{23} %argrw{"wr"}
+	mul		$tmp12 $tmp13 $tmp10 	%argrw{"wrr"}
+	sub		___369_c_row ___369_c_row $tmp12 	%argrw{"wrr"}
+	lt		$tmp14 ___369_c_row $const2 	%line{24} %argrw{"wrr"}
+	if		$tmp14 29 30 	%argrw{"r"}
+	add		$tmp9 ___369_c_row $tmp10 	%argrw{"wrr"}
+	assign		$tmp9 ___369_c_row 	%argrw{"wr"}
+	return
+	assign		___369_r_row $tmp9 	%line{68} %argrw{"wr"}
+	assign		$tmp16 texPerColumn 	%line{69} %argrw{"wr"}
+	functioncall	$const7 44 	%argrw{"r"}
+	div		$tmp17 ___369_c_column $tmp16 	%line{22} %argrw{"wrr"}
+	assign		___366_n $tmp17 	%argrw{"wr"}
+	assign		$tmp19 ___366_n 	%line{23} %argrw{"wr"}
+	mul		$tmp18 $tmp19 $tmp16 	%argrw{"wrr"}
+	sub		___369_c_column ___369_c_column $tmp18 	%argrw{"wrr"}
+	lt		$tmp20 ___369_c_column $const2 	%line{24} %argrw{"wrr"}
+	if		$tmp20 42 43 	%argrw{"r"}
+	add		$tmp15 ___369_c_column $tmp16 	%argrw{"wrr"}
+	assign		$tmp15 ___369_c_column 	%argrw{"wr"}
+	return
+	assign		___369_r_col $tmp15 	%line{69} %argrw{"wr"}
+	assign		___369_ch_r $const6 	%line{70} %argrw{"wr"}
+	assign		___369_ch_c $const6 	%line{71} %argrw{"wr"}
+	eq		$tmp21 texPerRow $const5 	%line{73} %argrw{"wrr"}
+	neq		$tmp22 $tmp21 $const6 	%argrw{"wrr"}
+	if		$tmp22 50 53 	%argrw{"r"}
+	neq		$tmp23 ___369_c_row $const4 	%argrw{"wrr"}
+	neq		$tmp24 $tmp23 $const6 	%argrw{"wrr"}
+	assign		$tmp22 $tmp24 	%argrw{"wr"}
+	if		$tmp22 55 55 	%argrw{"r"}
+	assign		___369_ch_r $const5 	%argrw{"wr"}
+	eq		$tmp25 texPerColumn $const5 	%line{74} %argrw{"wrr"}
+	neq		$tmp26 $tmp25 $const6 	%argrw{"wrr"}
+	if		$tmp26 58 61 	%argrw{"r"}
+	neq		$tmp27 ___369_c_column $const4 	%argrw{"wrr"}
+	neq		$tmp28 $tmp27 $const6 	%argrw{"wrr"}
+	assign		$tmp26 $tmp28 	%argrw{"wr"}
+	if		$tmp26 63 63 	%argrw{"r"}
+	assign		___369_ch_c $const5 	%argrw{"wr"}
+	assign		___369_re $const2 	%line{75} %argrw{"wr"}
+	eq		$tmp29 texUseRowEdit $const5 	%line{77} %argrw{"wrr"}
+	neq		$tmp30 $tmp29 $const6 	%argrw{"wrr"}
+	if		$tmp30 70 70 	%argrw{"r"}
+	eq		$tmp31 ___369_r_row $const6 	%argrw{"wrr"}
+	neq		$tmp32 $tmp31 $const6 	%argrw{"wrr"}
+	assign		$tmp30 $tmp32 	%argrw{"wr"}
+	neq		$tmp33 $tmp30 $const6 	%argrw{"wrr"}
+	if		$tmp33 74 74 	%argrw{"r"}
+	neq		$tmp34 ___369_ch_r $const6 	%argrw{"wrr"}
+	assign		$tmp33 $tmp34 	%argrw{"wr"}
+	neq		$tmp35 $tmp33 $const6 	%argrw{"wrr"}
+	if		$tmp35 76 79 	%argrw{"r"}
+	eq		$tmp36 texUseRowEdit $const6 	%argrw{"wrr"}
+	neq		$tmp37 $tmp36 $const6 	%argrw{"wrr"}
+	assign		$tmp35 $tmp37 	%argrw{"wr"}
+	if		$tmp35 103 103 	%argrw{"r"}
+	eq		$tmp38 texUseColumnEdit $const5 	%line{78} %argrw{"wrr"}
+	neq		$tmp39 $tmp38 $const6 	%argrw{"wrr"}
+	if		$tmp39 86 86 	%argrw{"r"}
+	eq		$tmp40 ___369_r_col $const6 	%argrw{"wrr"}
+	neq		$tmp41 $tmp40 $const6 	%argrw{"wrr"}
+	assign		$tmp39 $tmp41 	%argrw{"wr"}
+	neq		$tmp42 $tmp39 $const6 	%argrw{"wrr"}
+	if		$tmp42 90 90 	%argrw{"r"}
+	neq		$tmp43 ___369_ch_c $const6 	%argrw{"wrr"}
+	assign		$tmp42 $tmp43 	%argrw{"wr"}
+	neq		$tmp44 $tmp42 $const6 	%argrw{"wrr"}
+	if		$tmp44 92 95 	%argrw{"r"}
+	eq		$tmp45 texUseColumnEdit $const6 	%argrw{"wrr"}
+	neq		$tmp46 $tmp45 $const6 	%argrw{"wrr"}
+	assign		$tmp44 $tmp46 	%argrw{"wr"}
+	if		$tmp44 103 103 	%argrw{"r"}
+	eq		$tmp47 texUseRowEdit $const5 	%line{79} %argrw{"wrr"}
+	if		$tmp47 99 99 	%argrw{"r"}
+	mul		___369_brickwidth ___369_brickwidth texChangeRow 	%line{80} %argrw{"wrr"}
+	eq		$tmp48 texUseColumnEdit $const5 	%line{82} %argrw{"wrr"}
+	if		$tmp48 103 103 	%argrw{"r"}
+	mul		___369_brickheight ___369_brickheight texChangeColumn 	%line{83} %argrw{"wrr"}
+	assign		___369_re texChangeRow 	%line{84} %argrw{"wr"}
+	div		___369_MWF ___369_mortarthicknessx ___369_brickwidth 	%line{89} %argrw{"wrr"}
+	div		___369_MHF ___369_mortarthicknessy ___369_brickheight 	%line{90} %argrw{"wrr"}
+	div		___369_numwide $const4 ___369_brickwidth 	%line{91} %argrw{"wrr"}
+	assign		___369_ns $const8 	%line{92} %argrw{"wr"}
+	assign		___369_nv $const8 	%line{93} %argrw{"wr"}
+	compref		$tmp49 uv $const6 	%line{94} %argrw{"wrr"}
+	div		$tmp50 ___369_brickwidth $const9 	%argrw{"wrr"}
+	div		$tmp51 $tmp49 $tmp50 	%argrw{"wrr"}
+	compassign	___369_ns $const6 $tmp51 	%argrw{"wrr"}
+	compref		$tmp52 uv $const5 	%line{95} %argrw{"wrr"}
+	div		$tmp53 ___369_brickheight $const9 	%argrw{"wrr"}
+	div		$tmp54 $tmp52 $tmp53 	%argrw{"wrr"}
+	compassign	___369_ns $const5 $tmp54 	%argrw{"wrr"}
+	compref		$tmp55 uv $const5 	%line{96} %argrw{"wrr"}
+	div		$tmp56 ___369_brickwidth $const9 	%argrw{"wrr"}
+	div		$tmp57 $tmp55 $tmp56 	%argrw{"wrr"}
+	compassign	___369_nv $const6 $tmp57 	%argrw{"wrr"}
+	compref		$tmp58 uv $const6 	%line{97} %argrw{"wrr"}
+	div		$tmp59 ___369_brickheight $const9 	%argrw{"wrr"}
+	div		$tmp60 $tmp58 $tmp59 	%argrw{"wrr"}
+	compassign	___369_nv $const5 $tmp60 	%argrw{"wrr"}
+	mul		___369_qk texEdgeRoughness $const10 	%line{98} %argrw{"wrr"}
+	compref		$tmp61 uv $const6 	%line{99} %argrw{"wrr"}
+	compref		$tmp63 ___369_ns $const6 	%argrw{"wrr"}
+	compref		$tmp64 ___369_ns $const5 	%argrw{"wrr"}
+	functioncall	$const11 130 	%argrw{"r"}
+	noise		$tmp62 $const12 $tmp63 $tmp64 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{153} %argrw{"wrrr"}
+	mul		$tmp65 ___369_qk $tmp62 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{99} %argrw{"wrr"}
+	add		___369_scoord $tmp61 $tmp65 	%argrw{"wrr"}
+	compref		$tmp66 uv $const5 	%line{100} %argrw{"wrr"}
+	compref		$tmp68 ___369_nv $const6 	%argrw{"wrr"}
+	compref		$tmp69 ___369_nv $const5 	%argrw{"wrr"}
+	functioncall	$const11 137 	%argrw{"r"}
+	noise		$tmp67 $const12 $tmp68 $tmp69 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{153} %argrw{"wrrr"}
+	mul		$tmp70 ___369_qk $tmp67 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{100} %argrw{"wrr"}
+	add		___369_tcoord $tmp66 $tmp70 	%argrw{"wrr"}
+	compref		$tmp73 uv $const6 	%line{102} %argrw{"wrr"}
+	Dx		$tmp72 $tmp73 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp71 $tmp72 	%argrw{"wr"}
+	compref		$tmp76 uv $const6 	%argrw{"wrr"}
+	Dy		$tmp75 $tmp76 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp74 $tmp75 	%argrw{"wr"}
+	add		___369_d_u $tmp71 $tmp74 	%argrw{"wrr"}
+	compref		$tmp79 uv $const5 	%line{103} %argrw{"wrr"}
+	Dx		$tmp78 $tmp79 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp77 $tmp78 	%argrw{"wr"}
+	compref		$tmp82 uv $const5 	%argrw{"wrr"}
+	Dy		$tmp81 $tmp82 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp80 $tmp81 	%argrw{"wr"}
+	add		___369_d_v $tmp77 $tmp80 	%argrw{"wrr"}
+	assign		$tmp85 ___369_scoord 	%line{105} %argrw{"wr"}
+	abs		$tmp84 $tmp85 	%argrw{"wr"}
+	assign		$tmp86 $tmp84 	%argrw{"wr"}
+	assign		$tmp88 ___369_tcoord 	%argrw{"wr"}
+	abs		$tmp87 $tmp88 	%argrw{"wr"}
+	assign		$tmp89 $tmp87 	%argrw{"wr"}
+	add		$tmp90 $tmp86 $tmp89 	%argrw{"wrr"}
+	max		$tmp83 $tmp90 $const13 	%argrw{"wrr"}
+	add		___369_swidth $tmp83 ___369_d_u 	%argrw{"wrr"}
+	assign		$tmp93 ___369_scoord 	%line{106} %argrw{"wr"}
+	abs		$tmp92 $tmp93 	%argrw{"wr"}
+	assign		$tmp94 $tmp92 	%argrw{"wr"}
+	assign		$tmp96 ___369_tcoord 	%argrw{"wr"}
+	abs		$tmp95 $tmp96 	%argrw{"wr"}
+	assign		$tmp97 $tmp95 	%argrw{"wr"}
+	add		$tmp98 $tmp94 $tmp97 	%argrw{"wrr"}
+	max		$tmp91 $tmp98 $const13 	%argrw{"wrr"}
+	add		___369_twidth $tmp91 ___369_d_v 	%argrw{"wrr"}
+	div		___369_swidth ___369_swidth ___369_brickwidth 	%line{107} %argrw{"wrr"}
+	div		___369_twidth ___369_twidth ___369_brickheight 	%line{108} %argrw{"wrr"}
+	div		___369_ss ___369_scoord ___369_brickwidth 	%line{109} %argrw{"wrr"}
+	div		___369_tt ___369_tcoord ___369_brickheight 	%line{110} %argrw{"wrr"}
+	floor		___369_tbrick ___369_tt 	%line{111} %argrw{"wr"}
+	add		$tmp100 ___369_tbrick $const14 	%line{112} %argrw{"wrr"}
+	assign		$tmp102 texRandomSeed 	%argrw{"wr"}
+	add		$tmp101 $tmp100 $tmp102 	%argrw{"wrr"}
+	functioncall	$const15 181 	%argrw{"r"}
+	noise		$tmp99 $const12 $tmp101 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{148} %argrw{"wrr"}
+	sub		$tmp103 $tmp99 $const14 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{112} %argrw{"wrr"}
+	mul		$tmp104 ___369_rowvary $tmp103 	%argrw{"wrr"}
+	add		___369_ss ___369_ss $tmp104 	%argrw{"wrr"}
+	mul		$tmp106 ___369_tt $const14 	%line{113} %argrw{"wrr"}
+	functioncall	$const7 196 	%argrw{"r"}
+	div		$tmp107 $tmp106 $const4 	%line{22} %argrw{"wrr"}
+	assign		___366_n $tmp107 	%argrw{"wr"}
+	assign		$tmp109 ___366_n 	%line{23} %argrw{"wr"}
+	mul		$tmp108 $tmp109 $const4 	%argrw{"wrr"}
+	sub		$tmp106 $tmp106 $tmp108 	%argrw{"wrr"}
+	lt		$tmp110 $tmp106 $const2 	%line{24} %argrw{"wrr"}
+	if		$tmp110 194 195 	%argrw{"r"}
+	add		$tmp105 $tmp106 $const4 	%argrw{"wrr"}
+	assign		$tmp105 $tmp106 	%argrw{"wr"}
+	return
+	gt		$tmp111 $tmp105 $const14 	%line{113} %argrw{"wrr"}
+	if		$tmp111 200 200 	%argrw{"r"}
+	add		$tmp112 $const14 texLineShift 	%argrw{"wrr"}
+	add		___369_ss ___369_ss $tmp112 	%argrw{"wrr"}
+	floor		___369_sbrick ___369_ss 	%line{114} %argrw{"wr"}
+	sub		___369_ss ___369_ss ___369_sbrick 	%line{115} %argrw{"wrr"}
+	sub		___369_tt ___369_tt ___369_tbrick 	%line{116} %argrw{"wrr"}
+	assign		___369_w $const2 	%line{117} %argrw{"wr"}
+	ge		$tmp113 ___369_swidth $const4 	%line{119} %argrw{"wrr"}
+	if		$tmp113 208 262 	%argrw{"r"}
+	mul		$tmp114 $const16 ___369_MWF 	%line{120} %argrw{"wrr"}
+	sub		___369_w $const4 $tmp114 	%argrw{"wrr"}
+	sub		$tmp117 ___369_MWF ___369_swidth 	%line{123} %argrw{"wrr"}
+	functioncall	$const17 222 	%argrw{"r"}
+	sub		$tmp118 ___369_ss $tmp117 	%line{32} %argrw{"wrr"}
+	sub		$tmp119 ___369_MWF $tmp117 	%argrw{"wrr"}
+	div		$tmp120 $tmp118 $tmp119 	%argrw{"wrr"}
+	functioncall	$const18 222 	%argrw{"r"}
+	lt		$tmp121 $tmp120 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp121 217 221 	%argrw{"r"}
+	assign		$tmp116 $const2 	%argrw{"wr"}
+	gt		$tmp122 $tmp120 $const4 	%argrw{"wrr"}
+	if		$tmp122 220 221 	%argrw{"r"}
+	assign		$tmp116 $const4 	%argrw{"wr"}
+	assign		$tmp116 $tmp120 	%argrw{"wr"}
+	return
+	div		$tmp124 ___369_MWF ___369_swidth 	%line{124} %argrw{"wrr"}
+	sub		$tmp125 $const4 $tmp124 	%argrw{"wrr"}
+	max		$tmp123 $tmp125 $const2 	%argrw{"wrr"}
+	functioncall	$const18 234 	%argrw{"r"}
+	lt		$tmp126 $tmp116 $tmp123 	%line{28} %argrw{"wrr"}
+	if		$tmp126 229 233 	%argrw{"r"}
+	assign		$tmp115 $tmp123 	%argrw{"wr"}
+	gt		$tmp127 $tmp116 $const4 	%argrw{"wrr"}
+	if		$tmp127 232 233 	%argrw{"r"}
+	assign		$tmp115 $const4 	%argrw{"wr"}
+	assign		$tmp115 $tmp116 	%argrw{"wr"}
+	return
+	sub		$tmp130 $const4 ___369_MWF 	%line{125} %argrw{"wrr"}
+	sub		$tmp131 $tmp130 ___369_swidth 	%argrw{"wrr"}
+	sub		$tmp132 $const4 ___369_MWF 	%argrw{"wrr"}
+	functioncall	$const17 250 	%argrw{"r"}
+	sub		$tmp133 ___369_ss $tmp131 	%line{32} %argrw{"wrr"}
+	sub		$tmp134 $tmp132 $tmp131 	%argrw{"wrr"}
+	div		$tmp135 $tmp133 $tmp134 	%argrw{"wrr"}
+	functioncall	$const18 250 	%argrw{"r"}
+	lt		$tmp136 $tmp135 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp136 245 249 	%argrw{"r"}
+	assign		$tmp129 $const2 	%argrw{"wr"}
+	gt		$tmp137 $tmp135 $const4 	%argrw{"wrr"}
+	if		$tmp137 248 249 	%argrw{"r"}
+	assign		$tmp129 $const4 	%argrw{"wr"}
+	assign		$tmp129 $tmp135 	%argrw{"wr"}
+	return
+	mul		$tmp138 $const16 ___369_MWF 	%line{126} %argrw{"wrr"}
+	div		$tmp139 $tmp138 ___369_swidth 	%argrw{"wrr"}
+	functioncall	$const18 261 	%argrw{"r"}
+	lt		$tmp140 $tmp129 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp140 256 260 	%argrw{"r"}
+	assign		$tmp128 $const2 	%argrw{"wr"}
+	gt		$tmp141 $tmp129 $tmp139 	%argrw{"wrr"}
+	if		$tmp141 259 260 	%argrw{"r"}
+	assign		$tmp128 $tmp139 	%argrw{"wr"}
+	assign		$tmp128 $tmp129 	%argrw{"wr"}
+	return
+	sub		___369_w $tmp115 $tmp128 	%line{126} %argrw{"wrr"}
+	assign		___369_ht $const2 	%line{128} %argrw{"wr"}
+	ge		$tmp142 ___369_twidth $const4 	%line{130} %argrw{"wrr"}
+	if		$tmp142 267 321 	%argrw{"r"}
+	mul		$tmp143 $const16 ___369_MHF 	%line{131} %argrw{"wrr"}
+	sub		___369_ht $const4 $tmp143 	%argrw{"wrr"}
+	sub		$tmp146 ___369_MHF ___369_twidth 	%line{134} %argrw{"wrr"}
+	functioncall	$const17 281 	%argrw{"r"}
+	sub		$tmp147 ___369_tt $tmp146 	%line{32} %argrw{"wrr"}
+	sub		$tmp148 ___369_MHF $tmp146 	%argrw{"wrr"}
+	div		$tmp149 $tmp147 $tmp148 	%argrw{"wrr"}
+	functioncall	$const18 281 	%argrw{"r"}
+	lt		$tmp150 $tmp149 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp150 276 280 	%argrw{"r"}
+	assign		$tmp145 $const2 	%argrw{"wr"}
+	gt		$tmp151 $tmp149 $const4 	%argrw{"wrr"}
+	if		$tmp151 279 280 	%argrw{"r"}
+	assign		$tmp145 $const4 	%argrw{"wr"}
+	assign		$tmp145 $tmp149 	%argrw{"wr"}
+	return
+	div		$tmp153 ___369_MHF ___369_twidth 	%line{135} %argrw{"wrr"}
+	sub		$tmp154 $const4 $tmp153 	%argrw{"wrr"}
+	max		$tmp152 $tmp154 $const2 	%argrw{"wrr"}
+	functioncall	$const18 293 	%argrw{"r"}
+	lt		$tmp155 $tmp145 $tmp152 	%line{28} %argrw{"wrr"}
+	if		$tmp155 288 292 	%argrw{"r"}
+	assign		$tmp144 $tmp152 	%argrw{"wr"}
+	gt		$tmp156 $tmp145 $const4 	%argrw{"wrr"}
+	if		$tmp156 291 292 	%argrw{"r"}
+	assign		$tmp144 $const4 	%argrw{"wr"}
+	assign		$tmp144 $tmp145 	%argrw{"wr"}
+	return
+	sub		$tmp159 $const4 ___369_MHF 	%line{136} %argrw{"wrr"}
+	sub		$tmp160 $tmp159 ___369_twidth 	%argrw{"wrr"}
+	sub		$tmp161 $const4 ___369_MHF 	%argrw{"wrr"}
+	functioncall	$const17 309 	%argrw{"r"}
+	sub		$tmp162 ___369_tt $tmp160 	%line{32} %argrw{"wrr"}
+	sub		$tmp163 $tmp161 $tmp160 	%argrw{"wrr"}
+	div		$tmp164 $tmp162 $tmp163 	%argrw{"wrr"}
+	functioncall	$const18 309 	%argrw{"r"}
+	lt		$tmp165 $tmp164 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp165 304 308 	%argrw{"r"}
+	assign		$tmp158 $const2 	%argrw{"wr"}
+	gt		$tmp166 $tmp164 $const4 	%argrw{"wrr"}
+	if		$tmp166 307 308 	%argrw{"r"}
+	assign		$tmp158 $const4 	%argrw{"wr"}
+	assign		$tmp158 $tmp164 	%argrw{"wr"}
+	return
+	mul		$tmp167 $const16 ___369_MHF 	%line{137} %argrw{"wrr"}
+	div		$tmp168 $tmp167 ___369_twidth 	%argrw{"wrr"}
+	functioncall	$const18 320 	%argrw{"r"}
+	lt		$tmp169 $tmp158 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp169 315 319 	%argrw{"r"}
+	assign		$tmp157 $const2 	%argrw{"wr"}
+	gt		$tmp170 $tmp158 $tmp168 	%argrw{"wrr"}
+	if		$tmp170 318 319 	%argrw{"r"}
+	assign		$tmp157 $tmp168 	%argrw{"wr"}
+	assign		$tmp157 $tmp158 	%argrw{"wr"}
+	return
+	sub		___369_ht $tmp144 $tmp157 	%line{137} %argrw{"wrr"}
+	mul		___369_mixer ___369_w ___369_ht 	%line{140} %argrw{"wrr"}
+	assign		___369_sStand ___369_sbrick 	%line{141} %argrw{"wr"}
+	assign		randomPack $const2 	%line{142} %argrw{"wr"}
+	assign		$tmp171 ___369_sStand 	%line{143} %argrw{"wr"}
+	assign		$tmp172 ___369_numwide 	%argrw{"wr"}
+	eq		$tmp173 $tmp171 $tmp172 	%argrw{"wrr"}
+	if		$tmp173 329 329 	%argrw{"r"}
+	assign		___369_sStand $const2 	%argrw{"wr"}
+	gt		$tmp174 ___369_re $const2 	%line{144} %argrw{"wrr"}
+	neq		$tmp175 $tmp174 $const6 	%argrw{"wrr"}
+	if		$tmp175 336 336 	%argrw{"r"}
+	sub		$tmp176 $const4 ___369_re 	%argrw{"wrr"}
+	neq		$tmp177 $tmp176 $const2 	%argrw{"wrr"}
+	neq		$tmp178 $tmp177 $const6 	%argrw{"wrr"}
+	assign		$tmp175 $tmp178 	%argrw{"wr"}
+	if		$tmp175 345 351 	%argrw{"r"}
+	add		$tmp179 ___369_tbrick $const4 	%line{146} %argrw{"wrr"}
+	add		$tmp180 ___369_sStand ___369_numwide 	%argrw{"wrr"}
+	sub		$tmp181 $const4 ___369_re 	%argrw{"wrr"}
+	mul		$tmp182 $tmp180 $tmp181 	%argrw{"wrr"}
+	mul		$tmp183 $tmp179 $tmp182 	%argrw{"wrr"}
+	assign		$tmp185 texRandomSeed 	%argrw{"wr"}
+	add		$tmp184 $tmp185 $tmp183 	%argrw{"wrr"}
+	add		randomPack $tmp184 $const14 	%line{147} %argrw{"wrr"}
+	add		$tmp186 ___369_tbrick $const4 	%line{151} %argrw{"wrr"}
+	add		$tmp187 ___369_sStand ___369_numwide 	%argrw{"wrr"}
+	mul		$tmp188 $tmp186 $tmp187 	%argrw{"wrr"}
+	assign		$tmp190 texRandomSeed 	%argrw{"wr"}
+	add		$tmp189 $tmp190 $tmp188 	%argrw{"wrr"}
+	add		randomPack $tmp189 $const14 	%line{152} %argrw{"wrr"}
+	assign		___369_randPack randomPack 	%line{154} %argrw{"wr"}
+	gt		$tmp191 texHoles $const6 	%line{155} %argrw{"wrr"}
+	neq		$tmp192 $tmp191 $const6 	%argrw{"wrr"}
+	if		$tmp192 358 358 	%argrw{"r"}
+	neq		$tmp193 texHoles $const19 	%argrw{"wrr"}
+	neq		$tmp194 $tmp193 $const6 	%argrw{"wrr"}
+	assign		$tmp192 $tmp194 	%argrw{"wr"}
+	if		$tmp192 388 388 	%argrw{"r"}
+	assign		___380_res $const2 	%line{156} %argrw{"wr"}
+	assign		___380_tres $const2 	%line{157} %argrw{"wr"}
+	functioncall	$const15 363 	%line{158} %argrw{"r"}
+	noise		___380_res $const12 randomPack 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{148} %argrw{"wrr"}
+	lt		$tmp195 ___380_res $const2 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{159} %argrw{"wrr"}
+	if		$tmp195 366 366 	%argrw{"r"}
+	mul		___380_res ___380_res ___380_res 	%argrw{"wrr"}
+	assign		$tmp197 texHoles 	%line{160} %argrw{"wr"}
+	add		$tmp196 $tmp197 $const4 	%argrw{"wrr"}
+	div		$tmp198 $const4 $tmp196 	%argrw{"wrr"}
+	functioncall	$const20 385 	%argrw{"r"}
+	lt		$tmp199 ___380_res $const2 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{307} %argrw{"wrr"}
+	if		$tmp199 374 374 	%argrw{"r"}
+	assign		___380_tres $const6 	%line{309} %argrw{"wr"}
+	return
+	gt		$tmp200 ___380_res $tmp198 	%line{312} %argrw{"wrr"}
+	if		$tmp200 378 378 	%argrw{"r"}
+	assign		___380_tres $const5 	%line{314} %argrw{"wr"}
+	return
+	eq		$tmp201 $const2 $tmp198 	%line{317} %argrw{"wrr"}
+	if		$tmp201 382 382 	%argrw{"r"}
+	assign		___380_tres ___380_res 	%line{319} %argrw{"wr"}
+	return
+	sub		$tmp202 ___380_res $const2 	%line{322} %argrw{"wrr"}
+	sub		$tmp203 $tmp198 $const2 	%argrw{"wrr"}
+	div		___380_tres $tmp202 $tmp203 	%argrw{"wrr"}
+	eq		$tmp204 ___380_tres $const4 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{161} %argrw{"wrr"}
+	if		$tmp204 388 388 	%argrw{"r"}
+	assign		___369_mixer $const2 	%argrw{"wr"}
+	eq		$tmp205 texHoles $const19 	%line{163} %argrw{"wrr"}
+	if		$tmp205 391 391 	%argrw{"r"}
+	assign		___369_mixer $const2 	%argrw{"wr"}
+	assign		mixer ___369_mixer 	%line{164} %argrw{"wr"}
+	assign		bcolor $const21 	%line{233} %argrw{"wr"}
+	assign		balpha $const2 	%line{234} %argrw{"wr"}
+	assign		brickcolor texBrickColor 	%line{235} %argrw{"wr"}
+	assign		brickalpha $const4 	%line{236} %argrw{"wr"}
+	assign		mortarcolor texMortarColor 	%line{237} %argrw{"wr"}
+	assign		mortaralpha $const4 	%line{238} %argrw{"wr"}
+	if		MortarMapEnabled 401 401 	%line{240} %argrw{"r"}
+	assign		mortarcolor MortarMap 	%line{241} %argrw{"wr"}
+	assign		mortaralpha MortarMap_alpha 	%line{242} %argrw{"wr"}
+	if		BrickMapEnabled 404 404 	%line{244} %argrw{"r"}
+	assign		brickcolor BrickMap 	%line{245} %argrw{"wr"}
+	assign		brickalpha BrickMap_alpha 	%line{246} %argrw{"wr"}
+	eq		$tmp206 mixer $const4 	%line{249} %argrw{"wrr"}
+	if		$tmp206 420 454 	%argrw{"r"}
+	assign		___383_val $const2 	%line{250} %argrw{"wr"}
+	functioncall	$const15 409 	%line{251} %argrw{"r"}
+	noise		$tmp207 $const12 randomPack 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{148} %argrw{"wrr"}
+	mul		$tmp208 texColorVariance $tmp207 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{251} %argrw{"wrr"}
+	add		___383_val $const4 $tmp208 	%argrw{"wrr"}
+	mul		bcolor brickcolor ___383_val 	%line{252} %argrw{"wrr"}
+	mul		balpha brickalpha ___383_val 	%line{253} %argrw{"wrr"}
+	functioncall	$const15 415 	%line{254} %argrw{"r"}
+	noise		$tmp209 $const12 randomPack 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{148} %argrw{"wrr"}
+	mul		$tmp210 texFadeVariance $tmp209 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{254} %argrw{"wrr"}
+	add		___383_val $const4 $tmp210 	%argrw{"wrr"}
+	mul		bcolor bcolor ___383_val 	%line{255} %argrw{"wrr"}
+	assign		result bcolor 	%line{256} %argrw{"wr"}
+	assign		result_alpha balpha 	%line{257} %argrw{"wr"}
+	eq		$tmp211 mixer $const2 	%line{258} %argrw{"wrr"}
+	if		$tmp211 424 454 	%argrw{"r"}
+	assign		result mortarcolor 	%line{259} %argrw{"wr"}
+	assign		result_alpha mortaralpha 	%line{260} %argrw{"wr"}
+	assign		___385_val $const2 	%line{263} %argrw{"wr"}
+	functioncall	$const15 427 	%line{264} %argrw{"r"}
+	noise		$tmp212 $const12 randomPack 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{148} %argrw{"wrr"}
+	mul		$tmp213 texColorVariance $tmp212 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{264} %argrw{"wrr"}
+	add		___385_val $const4 $tmp213 	%argrw{"wrr"}
+	lt		$tmp214 ___385_val $const2 	%line{265} %argrw{"wrr"}
+	if		$tmp214 432 432 	%argrw{"r"}
+	assign		___385_val $const2 	%argrw{"wr"}
+	mul		bcolor brickcolor ___385_val 	%line{266} %argrw{"wrr"}
+	mul		balpha brickalpha ___385_val 	%line{267} %argrw{"wrr"}
+	functioncall	$const15 436 	%line{268} %argrw{"r"}
+	noise		$tmp215 $const12 randomPack 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{148} %argrw{"wrr"}
+	mul		$tmp216 texFadeVariance $tmp215 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{268} %argrw{"wrr"}
+	add		___385_val $const4 $tmp216 	%argrw{"wrr"}
+	lt		$tmp217 ___385_val $const2 	%line{269} %argrw{"wrr"}
+	if		$tmp217 441 441 	%argrw{"r"}
+	assign		___385_val $const2 	%argrw{"wr"}
+	mul		bcolor bcolor ___385_val 	%line{270} %argrw{"wrr"}
+	assign		___385_Ct $const21 	%line{271} %argrw{"wr"}
+	assign		___385_Ca $const2 	%line{272} %argrw{"wr"}
+	sub		$tmp218 $const4 mixer 	%line{273} %argrw{"wrr"}
+	mul		$tmp219 mortarcolor $tmp218 	%argrw{"wrr"}
+	mul		$tmp220 bcolor mixer 	%argrw{"wrr"}
+	add		___385_Ct $tmp219 $tmp220 	%argrw{"wrr"}
+	sub		$tmp221 $const4 mixer 	%line{274} %argrw{"wrr"}
+	mul		$tmp222 mortaralpha $tmp221 	%argrw{"wrr"}
+	mul		$tmp223 balpha mixer 	%argrw{"wrr"}
+	add		___385_Ca $tmp222 $tmp223 	%argrw{"wrr"}
+	assign		result ___385_Ct 	%line{275} %argrw{"wr"}
+	assign		result_alpha ___385_Ca 	%line{276} %argrw{"wr"}
+	compref		$tmp226 uv $const6 	%line{281} %argrw{"wrr"}
+	Dx		$tmp225 $tmp226 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp224 $tmp225 	%argrw{"wr"}
+	compref		$tmp229 uv $const6 	%argrw{"wrr"}
+	Dy		$tmp228 $tmp229 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp227 $tmp228 	%argrw{"wr"}
+	add		___386_d_u $tmp224 $tmp227 	%argrw{"wrr"}
+	compref		$tmp232 uv $const5 	%line{282} %argrw{"wrr"}
+	Dx		$tmp231 $tmp232 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp230 $tmp231 	%argrw{"wr"}
+	compref		$tmp235 uv $const5 	%argrw{"wrr"}
+	Dy		$tmp234 $tmp235 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp233 $tmp234 	%argrw{"wr"}
+	add		___386_d_v $tmp230 $tmp233 	%argrw{"wrr"}
+	assign		___386_dfdu $const6 	%line{283} %argrw{"wr"}
+	neq		$tmp236 ___386_d_u $const6 	%line{284} %argrw{"wrr"}
+	if		$tmp236 867 867 	%argrw{"r"}
+	compref		$tmp237 uv $const6 	%line{286} %argrw{"wrr"}
+	add		$tmp238 $tmp237 ___386_d_u 	%argrw{"wrr"}
+	compassign	uv $const6 $tmp238 	%argrw{"wrr"}
+	functioncall	$const1 865 	%line{308} %argrw{"r"}
+	assign		___369_mixer $const2 	%line{59} %argrw{"wr"}
+	mul		___369_mortarthicknessx texHorizontalGap $const3 	%line{60} %argrw{"wrr"}
+	mul		___369_mortarthicknessy texVerticalGap $const3 	%line{61} %argrw{"wrr"}
+	assign		___369_brickvary texColorVariance 	%line{62} %argrw{"wr"}
+	assign		___369_rowvary texRandomShift 	%line{63} %argrw{"wr"}
+	add		$tmp240 texHorizontalCount ___369_mortarthicknessx 	%line{64} %argrw{"wrr"}
+	div		___369_brickwidth $const4 $tmp240 	%argrw{"wrr"}
+	add		$tmp241 texVerticalCount ___369_mortarthicknessy 	%line{65} %argrw{"wrr"}
+	div		___369_brickheight $const4 $tmp241 	%argrw{"wrr"}
+	compref		$tmp243 uv $const5 	%line{66} %argrw{"wrr"}
+	div		$tmp244 $tmp243 ___369_brickheight 	%argrw{"wrr"}
+	floor		$tmp242 $tmp244 	%argrw{"wr"}
+	add		___369_c_row $tmp242 $const4 	%argrw{"wrr"}
+	compref		$tmp246 uv $const6 	%line{67} %argrw{"wrr"}
+	div		$tmp247 $tmp246 ___369_brickwidth 	%argrw{"wrr"}
+	floor		$tmp245 $tmp247 	%argrw{"wr"}
+	add		___369_c_column $tmp245 $const4 	%argrw{"wrr"}
+	assign		$tmp249 texPerRow 	%line{68} %argrw{"wr"}
+	functioncall	$const7 504 	%argrw{"r"}
+	div		$tmp250 ___369_c_row $tmp249 	%line{22} %argrw{"wrr"}
+	assign		___366_n $tmp250 	%argrw{"wr"}
+	assign		$tmp252 ___366_n 	%line{23} %argrw{"wr"}
+	mul		$tmp251 $tmp252 $tmp249 	%argrw{"wrr"}
+	sub		___369_c_row ___369_c_row $tmp251 	%argrw{"wrr"}
+	lt		$tmp253 ___369_c_row $const2 	%line{24} %argrw{"wrr"}
+	if		$tmp253 502 503 	%argrw{"r"}
+	add		$tmp248 ___369_c_row $tmp249 	%argrw{"wrr"}
+	assign		$tmp248 ___369_c_row 	%argrw{"wr"}
+	return
+	assign		___369_r_row $tmp248 	%line{68} %argrw{"wr"}
+	assign		$tmp255 texPerColumn 	%line{69} %argrw{"wr"}
+	functioncall	$const7 517 	%argrw{"r"}
+	div		$tmp256 ___369_c_column $tmp255 	%line{22} %argrw{"wrr"}
+	assign		___366_n $tmp256 	%argrw{"wr"}
+	assign		$tmp258 ___366_n 	%line{23} %argrw{"wr"}
+	mul		$tmp257 $tmp258 $tmp255 	%argrw{"wrr"}
+	sub		___369_c_column ___369_c_column $tmp257 	%argrw{"wrr"}
+	lt		$tmp259 ___369_c_column $const2 	%line{24} %argrw{"wrr"}
+	if		$tmp259 515 516 	%argrw{"r"}
+	add		$tmp254 ___369_c_column $tmp255 	%argrw{"wrr"}
+	assign		$tmp254 ___369_c_column 	%argrw{"wr"}
+	return
+	assign		___369_r_col $tmp254 	%line{69} %argrw{"wr"}
+	assign		___369_ch_r $const6 	%line{70} %argrw{"wr"}
+	assign		___369_ch_c $const6 	%line{71} %argrw{"wr"}
+	eq		$tmp260 texPerRow $const5 	%line{73} %argrw{"wrr"}
+	neq		$tmp261 $tmp260 $const6 	%argrw{"wrr"}
+	if		$tmp261 523 526 	%argrw{"r"}
+	neq		$tmp262 ___369_c_row $const4 	%argrw{"wrr"}
+	neq		$tmp263 $tmp262 $const6 	%argrw{"wrr"}
+	assign		$tmp261 $tmp263 	%argrw{"wr"}
+	if		$tmp261 528 528 	%argrw{"r"}
+	assign		___369_ch_r $const5 	%argrw{"wr"}
+	eq		$tmp264 texPerColumn $const5 	%line{74} %argrw{"wrr"}
+	neq		$tmp265 $tmp264 $const6 	%argrw{"wrr"}
+	if		$tmp265 531 534 	%argrw{"r"}
+	neq		$tmp266 ___369_c_column $const4 	%argrw{"wrr"}
+	neq		$tmp267 $tmp266 $const6 	%argrw{"wrr"}
+	assign		$tmp265 $tmp267 	%argrw{"wr"}
+	if		$tmp265 536 536 	%argrw{"r"}
+	assign		___369_ch_c $const5 	%argrw{"wr"}
+	assign		___369_re $const2 	%line{75} %argrw{"wr"}
+	eq		$tmp268 texUseRowEdit $const5 	%line{77} %argrw{"wrr"}
+	neq		$tmp269 $tmp268 $const6 	%argrw{"wrr"}
+	if		$tmp269 543 543 	%argrw{"r"}
+	eq		$tmp270 ___369_r_row $const6 	%argrw{"wrr"}
+	neq		$tmp271 $tmp270 $const6 	%argrw{"wrr"}
+	assign		$tmp269 $tmp271 	%argrw{"wr"}
+	neq		$tmp272 $tmp269 $const6 	%argrw{"wrr"}
+	if		$tmp272 547 547 	%argrw{"r"}
+	neq		$tmp273 ___369_ch_r $const6 	%argrw{"wrr"}
+	assign		$tmp272 $tmp273 	%argrw{"wr"}
+	neq		$tmp274 $tmp272 $const6 	%argrw{"wrr"}
+	if		$tmp274 549 552 	%argrw{"r"}
+	eq		$tmp275 texUseRowEdit $const6 	%argrw{"wrr"}
+	neq		$tmp276 $tmp275 $const6 	%argrw{"wrr"}
+	assign		$tmp274 $tmp276 	%argrw{"wr"}
+	if		$tmp274 576 576 	%argrw{"r"}
+	eq		$tmp277 texUseColumnEdit $const5 	%line{78} %argrw{"wrr"}
+	neq		$tmp278 $tmp277 $const6 	%argrw{"wrr"}
+	if		$tmp278 559 559 	%argrw{"r"}
+	eq		$tmp279 ___369_r_col $const6 	%argrw{"wrr"}
+	neq		$tmp280 $tmp279 $const6 	%argrw{"wrr"}
+	assign		$tmp278 $tmp280 	%argrw{"wr"}
+	neq		$tmp281 $tmp278 $const6 	%argrw{"wrr"}
+	if		$tmp281 563 563 	%argrw{"r"}
+	neq		$tmp282 ___369_ch_c $const6 	%argrw{"wrr"}
+	assign		$tmp281 $tmp282 	%argrw{"wr"}
+	neq		$tmp283 $tmp281 $const6 	%argrw{"wrr"}
+	if		$tmp283 565 568 	%argrw{"r"}
+	eq		$tmp284 texUseColumnEdit $const6 	%argrw{"wrr"}
+	neq		$tmp285 $tmp284 $const6 	%argrw{"wrr"}
+	assign		$tmp283 $tmp285 	%argrw{"wr"}
+	if		$tmp283 576 576 	%argrw{"r"}
+	eq		$tmp286 texUseRowEdit $const5 	%line{79} %argrw{"wrr"}
+	if		$tmp286 572 572 	%argrw{"r"}
+	mul		___369_brickwidth ___369_brickwidth texChangeRow 	%line{80} %argrw{"wrr"}
+	eq		$tmp287 texUseColumnEdit $const5 	%line{82} %argrw{"wrr"}
+	if		$tmp287 576 576 	%argrw{"r"}
+	mul		___369_brickheight ___369_brickheight texChangeColumn 	%line{83} %argrw{"wrr"}
+	assign		___369_re texChangeRow 	%line{84} %argrw{"wr"}
+	div		___369_MWF ___369_mortarthicknessx ___369_brickwidth 	%line{89} %argrw{"wrr"}
+	div		___369_MHF ___369_mortarthicknessy ___369_brickheight 	%line{90} %argrw{"wrr"}
+	div		___369_numwide $const4 ___369_brickwidth 	%line{91} %argrw{"wrr"}
+	assign		___369_ns $const8 	%line{92} %argrw{"wr"}
+	assign		___369_nv $const8 	%line{93} %argrw{"wr"}
+	compref		$tmp288 uv $const6 	%line{94} %argrw{"wrr"}
+	div		$tmp289 ___369_brickwidth $const9 	%argrw{"wrr"}
+	div		$tmp290 $tmp288 $tmp289 	%argrw{"wrr"}
+	compassign	___369_ns $const6 $tmp290 	%argrw{"wrr"}
+	compref		$tmp291 uv $const5 	%line{95} %argrw{"wrr"}
+	div		$tmp292 ___369_brickheight $const9 	%argrw{"wrr"}
+	div		$tmp293 $tmp291 $tmp292 	%argrw{"wrr"}
+	compassign	___369_ns $const5 $tmp293 	%argrw{"wrr"}
+	compref		$tmp294 uv $const5 	%line{96} %argrw{"wrr"}
+	div		$tmp295 ___369_brickwidth $const9 	%argrw{"wrr"}
+	div		$tmp296 $tmp294 $tmp295 	%argrw{"wrr"}
+	compassign	___369_nv $const6 $tmp296 	%argrw{"wrr"}
+	compref		$tmp297 uv $const6 	%line{97} %argrw{"wrr"}
+	div		$tmp298 ___369_brickheight $const9 	%argrw{"wrr"}
+	div		$tmp299 $tmp297 $tmp298 	%argrw{"wrr"}
+	compassign	___369_nv $const5 $tmp299 	%argrw{"wrr"}
+	mul		___369_qk texEdgeRoughness $const10 	%line{98} %argrw{"wrr"}
+	compref		$tmp300 uv $const6 	%line{99} %argrw{"wrr"}
+	compref		$tmp302 ___369_ns $const6 	%argrw{"wrr"}
+	compref		$tmp303 ___369_ns $const5 	%argrw{"wrr"}
+	functioncall	$const11 603 	%argrw{"r"}
+	noise		$tmp301 $const12 $tmp302 $tmp303 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{153} %argrw{"wrrr"}
+	mul		$tmp304 ___369_qk $tmp301 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{99} %argrw{"wrr"}
+	add		___369_scoord $tmp300 $tmp304 	%argrw{"wrr"}
+	compref		$tmp305 uv $const5 	%line{100} %argrw{"wrr"}
+	compref		$tmp307 ___369_nv $const6 	%argrw{"wrr"}
+	compref		$tmp308 ___369_nv $const5 	%argrw{"wrr"}
+	functioncall	$const11 610 	%argrw{"r"}
+	noise		$tmp306 $const12 $tmp307 $tmp308 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{153} %argrw{"wrrr"}
+	mul		$tmp309 ___369_qk $tmp306 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{100} %argrw{"wrr"}
+	add		___369_tcoord $tmp305 $tmp309 	%argrw{"wrr"}
+	compref		$tmp312 uv $const6 	%line{102} %argrw{"wrr"}
+	Dx		$tmp311 $tmp312 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp310 $tmp311 	%argrw{"wr"}
+	compref		$tmp315 uv $const6 	%argrw{"wrr"}
+	Dy		$tmp314 $tmp315 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp313 $tmp314 	%argrw{"wr"}
+	add		___369_d_u $tmp310 $tmp313 	%argrw{"wrr"}
+	compref		$tmp318 uv $const5 	%line{103} %argrw{"wrr"}
+	Dx		$tmp317 $tmp318 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp316 $tmp317 	%argrw{"wr"}
+	compref		$tmp321 uv $const5 	%argrw{"wrr"}
+	Dy		$tmp320 $tmp321 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp319 $tmp320 	%argrw{"wr"}
+	add		___369_d_v $tmp316 $tmp319 	%argrw{"wrr"}
+	assign		$tmp324 ___369_scoord 	%line{105} %argrw{"wr"}
+	abs		$tmp323 $tmp324 	%argrw{"wr"}
+	assign		$tmp325 $tmp323 	%argrw{"wr"}
+	assign		$tmp327 ___369_tcoord 	%argrw{"wr"}
+	abs		$tmp326 $tmp327 	%argrw{"wr"}
+	assign		$tmp328 $tmp326 	%argrw{"wr"}
+	add		$tmp329 $tmp325 $tmp328 	%argrw{"wrr"}
+	max		$tmp322 $tmp329 $const13 	%argrw{"wrr"}
+	add		___369_swidth $tmp322 ___369_d_u 	%argrw{"wrr"}
+	assign		$tmp332 ___369_scoord 	%line{106} %argrw{"wr"}
+	abs		$tmp331 $tmp332 	%argrw{"wr"}
+	assign		$tmp333 $tmp331 	%argrw{"wr"}
+	assign		$tmp335 ___369_tcoord 	%argrw{"wr"}
+	abs		$tmp334 $tmp335 	%argrw{"wr"}
+	assign		$tmp336 $tmp334 	%argrw{"wr"}
+	add		$tmp337 $tmp333 $tmp336 	%argrw{"wrr"}
+	max		$tmp330 $tmp337 $const13 	%argrw{"wrr"}
+	add		___369_twidth $tmp330 ___369_d_v 	%argrw{"wrr"}
+	div		___369_swidth ___369_swidth ___369_brickwidth 	%line{107} %argrw{"wrr"}
+	div		___369_twidth ___369_twidth ___369_brickheight 	%line{108} %argrw{"wrr"}
+	div		___369_ss ___369_scoord ___369_brickwidth 	%line{109} %argrw{"wrr"}
+	div		___369_tt ___369_tcoord ___369_brickheight 	%line{110} %argrw{"wrr"}
+	floor		___369_tbrick ___369_tt 	%line{111} %argrw{"wr"}
+	add		$tmp339 ___369_tbrick $const14 	%line{112} %argrw{"wrr"}
+	assign		$tmp341 texRandomSeed 	%argrw{"wr"}
+	add		$tmp340 $tmp339 $tmp341 	%argrw{"wrr"}
+	functioncall	$const15 654 	%argrw{"r"}
+	noise		$tmp338 $const12 $tmp340 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{148} %argrw{"wrr"}
+	sub		$tmp342 $tmp338 $const14 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{112} %argrw{"wrr"}
+	mul		$tmp343 ___369_rowvary $tmp342 	%argrw{"wrr"}
+	add		___369_ss ___369_ss $tmp343 	%argrw{"wrr"}
+	mul		$tmp345 ___369_tt $const14 	%line{113} %argrw{"wrr"}
+	functioncall	$const7 669 	%argrw{"r"}
+	div		$tmp346 $tmp345 $const4 	%line{22} %argrw{"wrr"}
+	assign		___366_n $tmp346 	%argrw{"wr"}
+	assign		$tmp348 ___366_n 	%line{23} %argrw{"wr"}
+	mul		$tmp347 $tmp348 $const4 	%argrw{"wrr"}
+	sub		$tmp345 $tmp345 $tmp347 	%argrw{"wrr"}
+	lt		$tmp349 $tmp345 $const2 	%line{24} %argrw{"wrr"}
+	if		$tmp349 667 668 	%argrw{"r"}
+	add		$tmp344 $tmp345 $const4 	%argrw{"wrr"}
+	assign		$tmp344 $tmp345 	%argrw{"wr"}
+	return
+	gt		$tmp350 $tmp344 $const14 	%line{113} %argrw{"wrr"}
+	if		$tmp350 673 673 	%argrw{"r"}
+	add		$tmp351 $const14 texLineShift 	%argrw{"wrr"}
+	add		___369_ss ___369_ss $tmp351 	%argrw{"wrr"}
+	floor		___369_sbrick ___369_ss 	%line{114} %argrw{"wr"}
+	sub		___369_ss ___369_ss ___369_sbrick 	%line{115} %argrw{"wrr"}
+	sub		___369_tt ___369_tt ___369_tbrick 	%line{116} %argrw{"wrr"}
+	assign		___369_w $const2 	%line{117} %argrw{"wr"}
+	ge		$tmp352 ___369_swidth $const4 	%line{119} %argrw{"wrr"}
+	if		$tmp352 681 735 	%argrw{"r"}
+	mul		$tmp353 $const16 ___369_MWF 	%line{120} %argrw{"wrr"}
+	sub		___369_w $const4 $tmp353 	%argrw{"wrr"}
+	sub		$tmp356 ___369_MWF ___369_swidth 	%line{123} %argrw{"wrr"}
+	functioncall	$const17 695 	%argrw{"r"}
+	sub		$tmp357 ___369_ss $tmp356 	%line{32} %argrw{"wrr"}
+	sub		$tmp358 ___369_MWF $tmp356 	%argrw{"wrr"}
+	div		$tmp359 $tmp357 $tmp358 	%argrw{"wrr"}
+	functioncall	$const18 695 	%argrw{"r"}
+	lt		$tmp360 $tmp359 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp360 690 694 	%argrw{"r"}
+	assign		$tmp355 $const2 	%argrw{"wr"}
+	gt		$tmp361 $tmp359 $const4 	%argrw{"wrr"}
+	if		$tmp361 693 694 	%argrw{"r"}
+	assign		$tmp355 $const4 	%argrw{"wr"}
+	assign		$tmp355 $tmp359 	%argrw{"wr"}
+	return
+	div		$tmp363 ___369_MWF ___369_swidth 	%line{124} %argrw{"wrr"}
+	sub		$tmp364 $const4 $tmp363 	%argrw{"wrr"}
+	max		$tmp362 $tmp364 $const2 	%argrw{"wrr"}
+	functioncall	$const18 707 	%argrw{"r"}
+	lt		$tmp365 $tmp355 $tmp362 	%line{28} %argrw{"wrr"}
+	if		$tmp365 702 706 	%argrw{"r"}
+	assign		$tmp354 $tmp362 	%argrw{"wr"}
+	gt		$tmp366 $tmp355 $const4 	%argrw{"wrr"}
+	if		$tmp366 705 706 	%argrw{"r"}
+	assign		$tmp354 $const4 	%argrw{"wr"}
+	assign		$tmp354 $tmp355 	%argrw{"wr"}
+	return
+	sub		$tmp369 $const4 ___369_MWF 	%line{125} %argrw{"wrr"}
+	sub		$tmp370 $tmp369 ___369_swidth 	%argrw{"wrr"}
+	sub		$tmp371 $const4 ___369_MWF 	%argrw{"wrr"}
+	functioncall	$const17 723 	%argrw{"r"}
+	sub		$tmp372 ___369_ss $tmp370 	%line{32} %argrw{"wrr"}
+	sub		$tmp373 $tmp371 $tmp370 	%argrw{"wrr"}
+	div		$tmp374 $tmp372 $tmp373 	%argrw{"wrr"}
+	functioncall	$const18 723 	%argrw{"r"}
+	lt		$tmp375 $tmp374 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp375 718 722 	%argrw{"r"}
+	assign		$tmp368 $const2 	%argrw{"wr"}
+	gt		$tmp376 $tmp374 $const4 	%argrw{"wrr"}
+	if		$tmp376 721 722 	%argrw{"r"}
+	assign		$tmp368 $const4 	%argrw{"wr"}
+	assign		$tmp368 $tmp374 	%argrw{"wr"}
+	return
+	mul		$tmp377 $const16 ___369_MWF 	%line{126} %argrw{"wrr"}
+	div		$tmp378 $tmp377 ___369_swidth 	%argrw{"wrr"}
+	functioncall	$const18 734 	%argrw{"r"}
+	lt		$tmp379 $tmp368 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp379 729 733 	%argrw{"r"}
+	assign		$tmp367 $const2 	%argrw{"wr"}
+	gt		$tmp380 $tmp368 $tmp378 	%argrw{"wrr"}
+	if		$tmp380 732 733 	%argrw{"r"}
+	assign		$tmp367 $tmp378 	%argrw{"wr"}
+	assign		$tmp367 $tmp368 	%argrw{"wr"}
+	return
+	sub		___369_w $tmp354 $tmp367 	%line{126} %argrw{"wrr"}
+	assign		___369_ht $const2 	%line{128} %argrw{"wr"}
+	ge		$tmp381 ___369_twidth $const4 	%line{130} %argrw{"wrr"}
+	if		$tmp381 740 794 	%argrw{"r"}
+	mul		$tmp382 $const16 ___369_MHF 	%line{131} %argrw{"wrr"}
+	sub		___369_ht $const4 $tmp382 	%argrw{"wrr"}
+	sub		$tmp385 ___369_MHF ___369_twidth 	%line{134} %argrw{"wrr"}
+	functioncall	$const17 754 	%argrw{"r"}
+	sub		$tmp386 ___369_tt $tmp385 	%line{32} %argrw{"wrr"}
+	sub		$tmp387 ___369_MHF $tmp385 	%argrw{"wrr"}
+	div		$tmp388 $tmp386 $tmp387 	%argrw{"wrr"}
+	functioncall	$const18 754 	%argrw{"r"}
+	lt		$tmp389 $tmp388 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp389 749 753 	%argrw{"r"}
+	assign		$tmp384 $const2 	%argrw{"wr"}
+	gt		$tmp390 $tmp388 $const4 	%argrw{"wrr"}
+	if		$tmp390 752 753 	%argrw{"r"}
+	assign		$tmp384 $const4 	%argrw{"wr"}
+	assign		$tmp384 $tmp388 	%argrw{"wr"}
+	return
+	div		$tmp392 ___369_MHF ___369_twidth 	%line{135} %argrw{"wrr"}
+	sub		$tmp393 $const4 $tmp392 	%argrw{"wrr"}
+	max		$tmp391 $tmp393 $const2 	%argrw{"wrr"}
+	functioncall	$const18 766 	%argrw{"r"}
+	lt		$tmp394 $tmp384 $tmp391 	%line{28} %argrw{"wrr"}
+	if		$tmp394 761 765 	%argrw{"r"}
+	assign		$tmp383 $tmp391 	%argrw{"wr"}
+	gt		$tmp395 $tmp384 $const4 	%argrw{"wrr"}
+	if		$tmp395 764 765 	%argrw{"r"}
+	assign		$tmp383 $const4 	%argrw{"wr"}
+	assign		$tmp383 $tmp384 	%argrw{"wr"}
+	return
+	sub		$tmp398 $const4 ___369_MHF 	%line{136} %argrw{"wrr"}
+	sub		$tmp399 $tmp398 ___369_twidth 	%argrw{"wrr"}
+	sub		$tmp400 $const4 ___369_MHF 	%argrw{"wrr"}
+	functioncall	$const17 782 	%argrw{"r"}
+	sub		$tmp401 ___369_tt $tmp399 	%line{32} %argrw{"wrr"}
+	sub		$tmp402 $tmp400 $tmp399 	%argrw{"wrr"}
+	div		$tmp403 $tmp401 $tmp402 	%argrw{"wrr"}
+	functioncall	$const18 782 	%argrw{"r"}
+	lt		$tmp404 $tmp403 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp404 777 781 	%argrw{"r"}
+	assign		$tmp397 $const2 	%argrw{"wr"}
+	gt		$tmp405 $tmp403 $const4 	%argrw{"wrr"}
+	if		$tmp405 780 781 	%argrw{"r"}
+	assign		$tmp397 $const4 	%argrw{"wr"}
+	assign		$tmp397 $tmp403 	%argrw{"wr"}
+	return
+	mul		$tmp406 $const16 ___369_MHF 	%line{137} %argrw{"wrr"}
+	div		$tmp407 $tmp406 ___369_twidth 	%argrw{"wrr"}
+	functioncall	$const18 793 	%argrw{"r"}
+	lt		$tmp408 $tmp397 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp408 788 792 	%argrw{"r"}
+	assign		$tmp396 $const2 	%argrw{"wr"}
+	gt		$tmp409 $tmp397 $tmp407 	%argrw{"wrr"}
+	if		$tmp409 791 792 	%argrw{"r"}
+	assign		$tmp396 $tmp407 	%argrw{"wr"}
+	assign		$tmp396 $tmp397 	%argrw{"wr"}
+	return
+	sub		___369_ht $tmp383 $tmp396 	%line{137} %argrw{"wrr"}
+	mul		___369_mixer ___369_w ___369_ht 	%line{140} %argrw{"wrr"}
+	assign		___369_sStand ___369_sbrick 	%line{141} %argrw{"wr"}
+	assign		randomPack $const2 	%line{142} %argrw{"wr"}
+	assign		$tmp410 ___369_sStand 	%line{143} %argrw{"wr"}
+	assign		$tmp411 ___369_numwide 	%argrw{"wr"}
+	eq		$tmp412 $tmp410 $tmp411 	%argrw{"wrr"}
+	if		$tmp412 802 802 	%argrw{"r"}
+	assign		___369_sStand $const2 	%argrw{"wr"}
+	gt		$tmp413 ___369_re $const2 	%line{144} %argrw{"wrr"}
+	neq		$tmp414 $tmp413 $const6 	%argrw{"wrr"}
+	if		$tmp414 809 809 	%argrw{"r"}
+	sub		$tmp415 $const4 ___369_re 	%argrw{"wrr"}
+	neq		$tmp416 $tmp415 $const2 	%argrw{"wrr"}
+	neq		$tmp417 $tmp416 $const6 	%argrw{"wrr"}
+	assign		$tmp414 $tmp417 	%argrw{"wr"}
+	if		$tmp414 818 824 	%argrw{"r"}
+	add		$tmp418 ___369_tbrick $const4 	%line{146} %argrw{"wrr"}
+	add		$tmp419 ___369_sStand ___369_numwide 	%argrw{"wrr"}
+	sub		$tmp420 $const4 ___369_re 	%argrw{"wrr"}
+	mul		$tmp421 $tmp419 $tmp420 	%argrw{"wrr"}
+	mul		$tmp422 $tmp418 $tmp421 	%argrw{"wrr"}
+	assign		$tmp424 texRandomSeed 	%argrw{"wr"}
+	add		$tmp423 $tmp424 $tmp422 	%argrw{"wrr"}
+	add		randomPack $tmp423 $const14 	%line{147} %argrw{"wrr"}
+	add		$tmp425 ___369_tbrick $const4 	%line{151} %argrw{"wrr"}
+	add		$tmp426 ___369_sStand ___369_numwide 	%argrw{"wrr"}
+	mul		$tmp427 $tmp425 $tmp426 	%argrw{"wrr"}
+	assign		$tmp429 texRandomSeed 	%argrw{"wr"}
+	add		$tmp428 $tmp429 $tmp427 	%argrw{"wrr"}
+	add		randomPack $tmp428 $const14 	%line{152} %argrw{"wrr"}
+	assign		___369_randPack randomPack 	%line{154} %argrw{"wr"}
+	gt		$tmp430 texHoles $const6 	%line{155} %argrw{"wrr"}
+	neq		$tmp431 $tmp430 $const6 	%argrw{"wrr"}
+	if		$tmp431 831 831 	%argrw{"r"}
+	neq		$tmp432 texHoles $const19 	%argrw{"wrr"}
+	neq		$tmp433 $tmp432 $const6 	%argrw{"wrr"}
+	assign		$tmp431 $tmp433 	%argrw{"wr"}
+	if		$tmp431 861 861 	%argrw{"r"}
+	assign		___380_res $const2 	%line{156} %argrw{"wr"}
+	assign		___380_tres $const2 	%line{157} %argrw{"wr"}
+	functioncall	$const15 836 	%line{158} %argrw{"r"}
+	noise		___380_res $const12 randomPack 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{148} %argrw{"wrr"}
+	lt		$tmp434 ___380_res $const2 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{159} %argrw{"wrr"}
+	if		$tmp434 839 839 	%argrw{"r"}
+	mul		___380_res ___380_res ___380_res 	%argrw{"wrr"}
+	assign		$tmp436 texHoles 	%line{160} %argrw{"wr"}
+	add		$tmp435 $tmp436 $const4 	%argrw{"wrr"}
+	div		$tmp437 $const4 $tmp435 	%argrw{"wrr"}
+	functioncall	$const20 858 	%argrw{"r"}
+	lt		$tmp438 ___380_res $const2 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{307} %argrw{"wrr"}
+	if		$tmp438 847 847 	%argrw{"r"}
+	assign		___380_tres $const6 	%line{309} %argrw{"wr"}
+	return
+	gt		$tmp439 ___380_res $tmp437 	%line{312} %argrw{"wrr"}
+	if		$tmp439 851 851 	%argrw{"r"}
+	assign		___380_tres $const5 	%line{314} %argrw{"wr"}
+	return
+	eq		$tmp440 $const2 $tmp437 	%line{317} %argrw{"wrr"}
+	if		$tmp440 855 855 	%argrw{"r"}
+	assign		___380_tres ___380_res 	%line{319} %argrw{"wr"}
+	return
+	sub		$tmp441 ___380_res $const2 	%line{322} %argrw{"wrr"}
+	sub		$tmp442 $tmp437 $const2 	%argrw{"wrr"}
+	div		___380_tres $tmp441 $tmp442 	%argrw{"wrr"}
+	eq		$tmp443 ___380_tres $const4 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{161} %argrw{"wrr"}
+	if		$tmp443 861 861 	%argrw{"r"}
+	assign		___369_mixer $const2 	%argrw{"wr"}
+	eq		$tmp444 texHoles $const19 	%line{163} %argrw{"wrr"}
+	if		$tmp444 864 864 	%argrw{"r"}
+	assign		___369_mixer $const2 	%argrw{"wr"}
+	assign		$tmp239 ___369_mixer 	%line{164} %argrw{"wr"}
+	sub		$tmp445 mixer $tmp239 	%line{308} %argrw{"wrr"}
+	div		___386_dfdu $tmp445 ___386_d_u 	%argrw{"wrr"}
+	assign		___386_dfdv $const6 	%line{310} %argrw{"wr"}
+	neq		$tmp446 ___386_d_v $const6 	%line{311} %argrw{"wrr"}
+	if		$tmp446 1266 1266 	%argrw{"r"}
+	compref		$tmp447 uv $const5 	%line{313} %argrw{"wrr"}
+	add		$tmp448 $tmp447 ___386_d_v 	%argrw{"wrr"}
+	compassign	uv $const5 $tmp448 	%argrw{"wrr"}
+	functioncall	$const1 1264 	%line{335} %argrw{"r"}
+	assign		___369_mixer $const2 	%line{59} %argrw{"wr"}
+	mul		___369_mortarthicknessx texHorizontalGap $const3 	%line{60} %argrw{"wrr"}
+	mul		___369_mortarthicknessy texVerticalGap $const3 	%line{61} %argrw{"wrr"}
+	assign		___369_brickvary texColorVariance 	%line{62} %argrw{"wr"}
+	assign		___369_rowvary texRandomShift 	%line{63} %argrw{"wr"}
+	add		$tmp450 texHorizontalCount ___369_mortarthicknessx 	%line{64} %argrw{"wrr"}
+	div		___369_brickwidth $const4 $tmp450 	%argrw{"wrr"}
+	add		$tmp451 texVerticalCount ___369_mortarthicknessy 	%line{65} %argrw{"wrr"}
+	div		___369_brickheight $const4 $tmp451 	%argrw{"wrr"}
+	compref		$tmp453 uv $const5 	%line{66} %argrw{"wrr"}
+	div		$tmp454 $tmp453 ___369_brickheight 	%argrw{"wrr"}
+	floor		$tmp452 $tmp454 	%argrw{"wr"}
+	add		___369_c_row $tmp452 $const4 	%argrw{"wrr"}
+	compref		$tmp456 uv $const6 	%line{67} %argrw{"wrr"}
+	div		$tmp457 $tmp456 ___369_brickwidth 	%argrw{"wrr"}
+	floor		$tmp455 $tmp457 	%argrw{"wr"}
+	add		___369_c_column $tmp455 $const4 	%argrw{"wrr"}
+	assign		$tmp459 texPerRow 	%line{68} %argrw{"wr"}
+	functioncall	$const7 903 	%argrw{"r"}
+	div		$tmp460 ___369_c_row $tmp459 	%line{22} %argrw{"wrr"}
+	assign		___366_n $tmp460 	%argrw{"wr"}
+	assign		$tmp462 ___366_n 	%line{23} %argrw{"wr"}
+	mul		$tmp461 $tmp462 $tmp459 	%argrw{"wrr"}
+	sub		___369_c_row ___369_c_row $tmp461 	%argrw{"wrr"}
+	lt		$tmp463 ___369_c_row $const2 	%line{24} %argrw{"wrr"}
+	if		$tmp463 901 902 	%argrw{"r"}
+	add		$tmp458 ___369_c_row $tmp459 	%argrw{"wrr"}
+	assign		$tmp458 ___369_c_row 	%argrw{"wr"}
+	return
+	assign		___369_r_row $tmp458 	%line{68} %argrw{"wr"}
+	assign		$tmp465 texPerColumn 	%line{69} %argrw{"wr"}
+	functioncall	$const7 916 	%argrw{"r"}
+	div		$tmp466 ___369_c_column $tmp465 	%line{22} %argrw{"wrr"}
+	assign		___366_n $tmp466 	%argrw{"wr"}
+	assign		$tmp468 ___366_n 	%line{23} %argrw{"wr"}
+	mul		$tmp467 $tmp468 $tmp465 	%argrw{"wrr"}
+	sub		___369_c_column ___369_c_column $tmp467 	%argrw{"wrr"}
+	lt		$tmp469 ___369_c_column $const2 	%line{24} %argrw{"wrr"}
+	if		$tmp469 914 915 	%argrw{"r"}
+	add		$tmp464 ___369_c_column $tmp465 	%argrw{"wrr"}
+	assign		$tmp464 ___369_c_column 	%argrw{"wr"}
+	return
+	assign		___369_r_col $tmp464 	%line{69} %argrw{"wr"}
+	assign		___369_ch_r $const6 	%line{70} %argrw{"wr"}
+	assign		___369_ch_c $const6 	%line{71} %argrw{"wr"}
+	eq		$tmp470 texPerRow $const5 	%line{73} %argrw{"wrr"}
+	neq		$tmp471 $tmp470 $const6 	%argrw{"wrr"}
+	if		$tmp471 922 925 	%argrw{"r"}
+	neq		$tmp472 ___369_c_row $const4 	%argrw{"wrr"}
+	neq		$tmp473 $tmp472 $const6 	%argrw{"wrr"}
+	assign		$tmp471 $tmp473 	%argrw{"wr"}
+	if		$tmp471 927 927 	%argrw{"r"}
+	assign		___369_ch_r $const5 	%argrw{"wr"}
+	eq		$tmp474 texPerColumn $const5 	%line{74} %argrw{"wrr"}
+	neq		$tmp475 $tmp474 $const6 	%argrw{"wrr"}
+	if		$tmp475 930 933 	%argrw{"r"}
+	neq		$tmp476 ___369_c_column $const4 	%argrw{"wrr"}
+	neq		$tmp477 $tmp476 $const6 	%argrw{"wrr"}
+	assign		$tmp475 $tmp477 	%argrw{"wr"}
+	if		$tmp475 935 935 	%argrw{"r"}
+	assign		___369_ch_c $const5 	%argrw{"wr"}
+	assign		___369_re $const2 	%line{75} %argrw{"wr"}
+	eq		$tmp478 texUseRowEdit $const5 	%line{77} %argrw{"wrr"}
+	neq		$tmp479 $tmp478 $const6 	%argrw{"wrr"}
+	if		$tmp479 942 942 	%argrw{"r"}
+	eq		$tmp480 ___369_r_row $const6 	%argrw{"wrr"}
+	neq		$tmp481 $tmp480 $const6 	%argrw{"wrr"}
+	assign		$tmp479 $tmp481 	%argrw{"wr"}
+	neq		$tmp482 $tmp479 $const6 	%argrw{"wrr"}
+	if		$tmp482 946 946 	%argrw{"r"}
+	neq		$tmp483 ___369_ch_r $const6 	%argrw{"wrr"}
+	assign		$tmp482 $tmp483 	%argrw{"wr"}
+	neq		$tmp484 $tmp482 $const6 	%argrw{"wrr"}
+	if		$tmp484 948 951 	%argrw{"r"}
+	eq		$tmp485 texUseRowEdit $const6 	%argrw{"wrr"}
+	neq		$tmp486 $tmp485 $const6 	%argrw{"wrr"}
+	assign		$tmp484 $tmp486 	%argrw{"wr"}
+	if		$tmp484 975 975 	%argrw{"r"}
+	eq		$tmp487 texUseColumnEdit $const5 	%line{78} %argrw{"wrr"}
+	neq		$tmp488 $tmp487 $const6 	%argrw{"wrr"}
+	if		$tmp488 958 958 	%argrw{"r"}
+	eq		$tmp489 ___369_r_col $const6 	%argrw{"wrr"}
+	neq		$tmp490 $tmp489 $const6 	%argrw{"wrr"}
+	assign		$tmp488 $tmp490 	%argrw{"wr"}
+	neq		$tmp491 $tmp488 $const6 	%argrw{"wrr"}
+	if		$tmp491 962 962 	%argrw{"r"}
+	neq		$tmp492 ___369_ch_c $const6 	%argrw{"wrr"}
+	assign		$tmp491 $tmp492 	%argrw{"wr"}
+	neq		$tmp493 $tmp491 $const6 	%argrw{"wrr"}
+	if		$tmp493 964 967 	%argrw{"r"}
+	eq		$tmp494 texUseColumnEdit $const6 	%argrw{"wrr"}
+	neq		$tmp495 $tmp494 $const6 	%argrw{"wrr"}
+	assign		$tmp493 $tmp495 	%argrw{"wr"}
+	if		$tmp493 975 975 	%argrw{"r"}
+	eq		$tmp496 texUseRowEdit $const5 	%line{79} %argrw{"wrr"}
+	if		$tmp496 971 971 	%argrw{"r"}
+	mul		___369_brickwidth ___369_brickwidth texChangeRow 	%line{80} %argrw{"wrr"}
+	eq		$tmp497 texUseColumnEdit $const5 	%line{82} %argrw{"wrr"}
+	if		$tmp497 975 975 	%argrw{"r"}
+	mul		___369_brickheight ___369_brickheight texChangeColumn 	%line{83} %argrw{"wrr"}
+	assign		___369_re texChangeRow 	%line{84} %argrw{"wr"}
+	div		___369_MWF ___369_mortarthicknessx ___369_brickwidth 	%line{89} %argrw{"wrr"}
+	div		___369_MHF ___369_mortarthicknessy ___369_brickheight 	%line{90} %argrw{"wrr"}
+	div		___369_numwide $const4 ___369_brickwidth 	%line{91} %argrw{"wrr"}
+	assign		___369_ns $const8 	%line{92} %argrw{"wr"}
+	assign		___369_nv $const8 	%line{93} %argrw{"wr"}
+	compref		$tmp498 uv $const6 	%line{94} %argrw{"wrr"}
+	div		$tmp499 ___369_brickwidth $const9 	%argrw{"wrr"}
+	div		$tmp500 $tmp498 $tmp499 	%argrw{"wrr"}
+	compassign	___369_ns $const6 $tmp500 	%argrw{"wrr"}
+	compref		$tmp501 uv $const5 	%line{95} %argrw{"wrr"}
+	div		$tmp502 ___369_brickheight $const9 	%argrw{"wrr"}
+	div		$tmp503 $tmp501 $tmp502 	%argrw{"wrr"}
+	compassign	___369_ns $const5 $tmp503 	%argrw{"wrr"}
+	compref		$tmp504 uv $const5 	%line{96} %argrw{"wrr"}
+	div		$tmp505 ___369_brickwidth $const9 	%argrw{"wrr"}
+	div		$tmp506 $tmp504 $tmp505 	%argrw{"wrr"}
+	compassign	___369_nv $const6 $tmp506 	%argrw{"wrr"}
+	compref		$tmp507 uv $const6 	%line{97} %argrw{"wrr"}
+	div		$tmp508 ___369_brickheight $const9 	%argrw{"wrr"}
+	div		$tmp509 $tmp507 $tmp508 	%argrw{"wrr"}
+	compassign	___369_nv $const5 $tmp509 	%argrw{"wrr"}
+	mul		___369_qk texEdgeRoughness $const10 	%line{98} %argrw{"wrr"}
+	compref		$tmp510 uv $const6 	%line{99} %argrw{"wrr"}
+	compref		$tmp512 ___369_ns $const6 	%argrw{"wrr"}
+	compref		$tmp513 ___369_ns $const5 	%argrw{"wrr"}
+	functioncall	$const11 1002 	%argrw{"r"}
+	noise		$tmp511 $const12 $tmp512 $tmp513 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{153} %argrw{"wrrr"}
+	mul		$tmp514 ___369_qk $tmp511 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{99} %argrw{"wrr"}
+	add		___369_scoord $tmp510 $tmp514 	%argrw{"wrr"}
+	compref		$tmp515 uv $const5 	%line{100} %argrw{"wrr"}
+	compref		$tmp517 ___369_nv $const6 	%argrw{"wrr"}
+	compref		$tmp518 ___369_nv $const5 	%argrw{"wrr"}
+	functioncall	$const11 1009 	%argrw{"r"}
+	noise		$tmp516 $const12 $tmp517 $tmp518 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{153} %argrw{"wrrr"}
+	mul		$tmp519 ___369_qk $tmp516 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{100} %argrw{"wrr"}
+	add		___369_tcoord $tmp515 $tmp519 	%argrw{"wrr"}
+	compref		$tmp522 uv $const6 	%line{102} %argrw{"wrr"}
+	Dx		$tmp521 $tmp522 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp520 $tmp521 	%argrw{"wr"}
+	compref		$tmp525 uv $const6 	%argrw{"wrr"}
+	Dy		$tmp524 $tmp525 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp523 $tmp524 	%argrw{"wr"}
+	add		___369_d_u $tmp520 $tmp523 	%argrw{"wrr"}
+	compref		$tmp528 uv $const5 	%line{103} %argrw{"wrr"}
+	Dx		$tmp527 $tmp528 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp526 $tmp527 	%argrw{"wr"}
+	compref		$tmp531 uv $const5 	%argrw{"wrr"}
+	Dy		$tmp530 $tmp531 	%argrw{"wr"} %argderivs{1}
+	fabs		$tmp529 $tmp530 	%argrw{"wr"}
+	add		___369_d_v $tmp526 $tmp529 	%argrw{"wrr"}
+	assign		$tmp534 ___369_scoord 	%line{105} %argrw{"wr"}
+	abs		$tmp533 $tmp534 	%argrw{"wr"}
+	assign		$tmp535 $tmp533 	%argrw{"wr"}
+	assign		$tmp537 ___369_tcoord 	%argrw{"wr"}
+	abs		$tmp536 $tmp537 	%argrw{"wr"}
+	assign		$tmp538 $tmp536 	%argrw{"wr"}
+	add		$tmp539 $tmp535 $tmp538 	%argrw{"wrr"}
+	max		$tmp532 $tmp539 $const13 	%argrw{"wrr"}
+	add		___369_swidth $tmp532 ___369_d_u 	%argrw{"wrr"}
+	assign		$tmp542 ___369_scoord 	%line{106} %argrw{"wr"}
+	abs		$tmp541 $tmp542 	%argrw{"wr"}
+	assign		$tmp543 $tmp541 	%argrw{"wr"}
+	assign		$tmp545 ___369_tcoord 	%argrw{"wr"}
+	abs		$tmp544 $tmp545 	%argrw{"wr"}
+	assign		$tmp546 $tmp544 	%argrw{"wr"}
+	add		$tmp547 $tmp543 $tmp546 	%argrw{"wrr"}
+	max		$tmp540 $tmp547 $const13 	%argrw{"wrr"}
+	add		___369_twidth $tmp540 ___369_d_v 	%argrw{"wrr"}
+	div		___369_swidth ___369_swidth ___369_brickwidth 	%line{107} %argrw{"wrr"}
+	div		___369_twidth ___369_twidth ___369_brickheight 	%line{108} %argrw{"wrr"}
+	div		___369_ss ___369_scoord ___369_brickwidth 	%line{109} %argrw{"wrr"}
+	div		___369_tt ___369_tcoord ___369_brickheight 	%line{110} %argrw{"wrr"}
+	floor		___369_tbrick ___369_tt 	%line{111} %argrw{"wr"}
+	add		$tmp549 ___369_tbrick $const14 	%line{112} %argrw{"wrr"}
+	assign		$tmp551 texRandomSeed 	%argrw{"wr"}
+	add		$tmp550 $tmp549 $tmp551 	%argrw{"wrr"}
+	functioncall	$const15 1053 	%argrw{"r"}
+	noise		$tmp548 $const12 $tmp550 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{148} %argrw{"wrr"}
+	sub		$tmp552 $tmp548 $const14 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{112} %argrw{"wrr"}
+	mul		$tmp553 ___369_rowvary $tmp552 	%argrw{"wrr"}
+	add		___369_ss ___369_ss $tmp553 	%argrw{"wrr"}
+	mul		$tmp555 ___369_tt $const14 	%line{113} %argrw{"wrr"}
+	functioncall	$const7 1068 	%argrw{"r"}
+	div		$tmp556 $tmp555 $const4 	%line{22} %argrw{"wrr"}
+	assign		___366_n $tmp556 	%argrw{"wr"}
+	assign		$tmp558 ___366_n 	%line{23} %argrw{"wr"}
+	mul		$tmp557 $tmp558 $const4 	%argrw{"wrr"}
+	sub		$tmp555 $tmp555 $tmp557 	%argrw{"wrr"}
+	lt		$tmp559 $tmp555 $const2 	%line{24} %argrw{"wrr"}
+	if		$tmp559 1066 1067 	%argrw{"r"}
+	add		$tmp554 $tmp555 $const4 	%argrw{"wrr"}
+	assign		$tmp554 $tmp555 	%argrw{"wr"}
+	return
+	gt		$tmp560 $tmp554 $const14 	%line{113} %argrw{"wrr"}
+	if		$tmp560 1072 1072 	%argrw{"r"}
+	add		$tmp561 $const14 texLineShift 	%argrw{"wrr"}
+	add		___369_ss ___369_ss $tmp561 	%argrw{"wrr"}
+	floor		___369_sbrick ___369_ss 	%line{114} %argrw{"wr"}
+	sub		___369_ss ___369_ss ___369_sbrick 	%line{115} %argrw{"wrr"}
+	sub		___369_tt ___369_tt ___369_tbrick 	%line{116} %argrw{"wrr"}
+	assign		___369_w $const2 	%line{117} %argrw{"wr"}
+	ge		$tmp562 ___369_swidth $const4 	%line{119} %argrw{"wrr"}
+	if		$tmp562 1080 1134 	%argrw{"r"}
+	mul		$tmp563 $const16 ___369_MWF 	%line{120} %argrw{"wrr"}
+	sub		___369_w $const4 $tmp563 	%argrw{"wrr"}
+	sub		$tmp566 ___369_MWF ___369_swidth 	%line{123} %argrw{"wrr"}
+	functioncall	$const17 1094 	%argrw{"r"}
+	sub		$tmp567 ___369_ss $tmp566 	%line{32} %argrw{"wrr"}
+	sub		$tmp568 ___369_MWF $tmp566 	%argrw{"wrr"}
+	div		$tmp569 $tmp567 $tmp568 	%argrw{"wrr"}
+	functioncall	$const18 1094 	%argrw{"r"}
+	lt		$tmp570 $tmp569 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp570 1089 1093 	%argrw{"r"}
+	assign		$tmp565 $const2 	%argrw{"wr"}
+	gt		$tmp571 $tmp569 $const4 	%argrw{"wrr"}
+	if		$tmp571 1092 1093 	%argrw{"r"}
+	assign		$tmp565 $const4 	%argrw{"wr"}
+	assign		$tmp565 $tmp569 	%argrw{"wr"}
+	return
+	div		$tmp573 ___369_MWF ___369_swidth 	%line{124} %argrw{"wrr"}
+	sub		$tmp574 $const4 $tmp573 	%argrw{"wrr"}
+	max		$tmp572 $tmp574 $const2 	%argrw{"wrr"}
+	functioncall	$const18 1106 	%argrw{"r"}
+	lt		$tmp575 $tmp565 $tmp572 	%line{28} %argrw{"wrr"}
+	if		$tmp575 1101 1105 	%argrw{"r"}
+	assign		$tmp564 $tmp572 	%argrw{"wr"}
+	gt		$tmp576 $tmp565 $const4 	%argrw{"wrr"}
+	if		$tmp576 1104 1105 	%argrw{"r"}
+	assign		$tmp564 $const4 	%argrw{"wr"}
+	assign		$tmp564 $tmp565 	%argrw{"wr"}
+	return
+	sub		$tmp579 $const4 ___369_MWF 	%line{125} %argrw{"wrr"}
+	sub		$tmp580 $tmp579 ___369_swidth 	%argrw{"wrr"}
+	sub		$tmp581 $const4 ___369_MWF 	%argrw{"wrr"}
+	functioncall	$const17 1122 	%argrw{"r"}
+	sub		$tmp582 ___369_ss $tmp580 	%line{32} %argrw{"wrr"}
+	sub		$tmp583 $tmp581 $tmp580 	%argrw{"wrr"}
+	div		$tmp584 $tmp582 $tmp583 	%argrw{"wrr"}
+	functioncall	$const18 1122 	%argrw{"r"}
+	lt		$tmp585 $tmp584 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp585 1117 1121 	%argrw{"r"}
+	assign		$tmp578 $const2 	%argrw{"wr"}
+	gt		$tmp586 $tmp584 $const4 	%argrw{"wrr"}
+	if		$tmp586 1120 1121 	%argrw{"r"}
+	assign		$tmp578 $const4 	%argrw{"wr"}
+	assign		$tmp578 $tmp584 	%argrw{"wr"}
+	return
+	mul		$tmp587 $const16 ___369_MWF 	%line{126} %argrw{"wrr"}
+	div		$tmp588 $tmp587 ___369_swidth 	%argrw{"wrr"}
+	functioncall	$const18 1133 	%argrw{"r"}
+	lt		$tmp589 $tmp578 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp589 1128 1132 	%argrw{"r"}
+	assign		$tmp577 $const2 	%argrw{"wr"}
+	gt		$tmp590 $tmp578 $tmp588 	%argrw{"wrr"}
+	if		$tmp590 1131 1132 	%argrw{"r"}
+	assign		$tmp577 $tmp588 	%argrw{"wr"}
+	assign		$tmp577 $tmp578 	%argrw{"wr"}
+	return
+	sub		___369_w $tmp564 $tmp577 	%line{126} %argrw{"wrr"}
+	assign		___369_ht $const2 	%line{128} %argrw{"wr"}
+	ge		$tmp591 ___369_twidth $const4 	%line{130} %argrw{"wrr"}
+	if		$tmp591 1139 1193 	%argrw{"r"}
+	mul		$tmp592 $const16 ___369_MHF 	%line{131} %argrw{"wrr"}
+	sub		___369_ht $const4 $tmp592 	%argrw{"wrr"}
+	sub		$tmp595 ___369_MHF ___369_twidth 	%line{134} %argrw{"wrr"}
+	functioncall	$const17 1153 	%argrw{"r"}
+	sub		$tmp596 ___369_tt $tmp595 	%line{32} %argrw{"wrr"}
+	sub		$tmp597 ___369_MHF $tmp595 	%argrw{"wrr"}
+	div		$tmp598 $tmp596 $tmp597 	%argrw{"wrr"}
+	functioncall	$const18 1153 	%argrw{"r"}
+	lt		$tmp599 $tmp598 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp599 1148 1152 	%argrw{"r"}
+	assign		$tmp594 $const2 	%argrw{"wr"}
+	gt		$tmp600 $tmp598 $const4 	%argrw{"wrr"}
+	if		$tmp600 1151 1152 	%argrw{"r"}
+	assign		$tmp594 $const4 	%argrw{"wr"}
+	assign		$tmp594 $tmp598 	%argrw{"wr"}
+	return
+	div		$tmp602 ___369_MHF ___369_twidth 	%line{135} %argrw{"wrr"}
+	sub		$tmp603 $const4 $tmp602 	%argrw{"wrr"}
+	max		$tmp601 $tmp603 $const2 	%argrw{"wrr"}
+	functioncall	$const18 1165 	%argrw{"r"}
+	lt		$tmp604 $tmp594 $tmp601 	%line{28} %argrw{"wrr"}
+	if		$tmp604 1160 1164 	%argrw{"r"}
+	assign		$tmp593 $tmp601 	%argrw{"wr"}
+	gt		$tmp605 $tmp594 $const4 	%argrw{"wrr"}
+	if		$tmp605 1163 1164 	%argrw{"r"}
+	assign		$tmp593 $const4 	%argrw{"wr"}
+	assign		$tmp593 $tmp594 	%argrw{"wr"}
+	return
+	sub		$tmp608 $const4 ___369_MHF 	%line{136} %argrw{"wrr"}
+	sub		$tmp609 $tmp608 ___369_twidth 	%argrw{"wrr"}
+	sub		$tmp610 $const4 ___369_MHF 	%argrw{"wrr"}
+	functioncall	$const17 1181 	%argrw{"r"}
+	sub		$tmp611 ___369_tt $tmp609 	%line{32} %argrw{"wrr"}
+	sub		$tmp612 $tmp610 $tmp609 	%argrw{"wrr"}
+	div		$tmp613 $tmp611 $tmp612 	%argrw{"wrr"}
+	functioncall	$const18 1181 	%argrw{"r"}
+	lt		$tmp614 $tmp613 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp614 1176 1180 	%argrw{"r"}
+	assign		$tmp607 $const2 	%argrw{"wr"}
+	gt		$tmp615 $tmp613 $const4 	%argrw{"wrr"}
+	if		$tmp615 1179 1180 	%argrw{"r"}
+	assign		$tmp607 $const4 	%argrw{"wr"}
+	assign		$tmp607 $tmp613 	%argrw{"wr"}
+	return
+	mul		$tmp616 $const16 ___369_MHF 	%line{137} %argrw{"wrr"}
+	div		$tmp617 $tmp616 ___369_twidth 	%argrw{"wrr"}
+	functioncall	$const18 1192 	%argrw{"r"}
+	lt		$tmp618 $tmp607 $const2 	%line{28} %argrw{"wrr"}
+	if		$tmp618 1187 1191 	%argrw{"r"}
+	assign		$tmp606 $const2 	%argrw{"wr"}
+	gt		$tmp619 $tmp607 $tmp617 	%argrw{"wrr"}
+	if		$tmp619 1190 1191 	%argrw{"r"}
+	assign		$tmp606 $tmp617 	%argrw{"wr"}
+	assign		$tmp606 $tmp607 	%argrw{"wr"}
+	return
+	sub		___369_ht $tmp593 $tmp606 	%line{137} %argrw{"wrr"}
+	mul		___369_mixer ___369_w ___369_ht 	%line{140} %argrw{"wrr"}
+	assign		___369_sStand ___369_sbrick 	%line{141} %argrw{"wr"}
+	assign		randomPack $const2 	%line{142} %argrw{"wr"}
+	assign		$tmp620 ___369_sStand 	%line{143} %argrw{"wr"}
+	assign		$tmp621 ___369_numwide 	%argrw{"wr"}
+	eq		$tmp622 $tmp620 $tmp621 	%argrw{"wrr"}
+	if		$tmp622 1201 1201 	%argrw{"r"}
+	assign		___369_sStand $const2 	%argrw{"wr"}
+	gt		$tmp623 ___369_re $const2 	%line{144} %argrw{"wrr"}
+	neq		$tmp624 $tmp623 $const6 	%argrw{"wrr"}
+	if		$tmp624 1208 1208 	%argrw{"r"}
+	sub		$tmp625 $const4 ___369_re 	%argrw{"wrr"}
+	neq		$tmp626 $tmp625 $const2 	%argrw{"wrr"}
+	neq		$tmp627 $tmp626 $const6 	%argrw{"wrr"}
+	assign		$tmp624 $tmp627 	%argrw{"wr"}
+	if		$tmp624 1217 1223 	%argrw{"r"}
+	add		$tmp628 ___369_tbrick $const4 	%line{146} %argrw{"wrr"}
+	add		$tmp629 ___369_sStand ___369_numwide 	%argrw{"wrr"}
+	sub		$tmp630 $const4 ___369_re 	%argrw{"wrr"}
+	mul		$tmp631 $tmp629 $tmp630 	%argrw{"wrr"}
+	mul		$tmp632 $tmp628 $tmp631 	%argrw{"wrr"}
+	assign		$tmp634 texRandomSeed 	%argrw{"wr"}
+	add		$tmp633 $tmp634 $tmp632 	%argrw{"wrr"}
+	add		randomPack $tmp633 $const14 	%line{147} %argrw{"wrr"}
+	add		$tmp635 ___369_tbrick $const4 	%line{151} %argrw{"wrr"}
+	add		$tmp636 ___369_sStand ___369_numwide 	%argrw{"wrr"}
+	mul		$tmp637 $tmp635 $tmp636 	%argrw{"wrr"}
+	assign		$tmp639 texRandomSeed 	%argrw{"wr"}
+	add		$tmp638 $tmp639 $tmp637 	%argrw{"wrr"}
+	add		randomPack $tmp638 $const14 	%line{152} %argrw{"wrr"}
+	assign		___369_randPack randomPack 	%line{154} %argrw{"wr"}
+	gt		$tmp640 texHoles $const6 	%line{155} %argrw{"wrr"}
+	neq		$tmp641 $tmp640 $const6 	%argrw{"wrr"}
+	if		$tmp641 1230 1230 	%argrw{"r"}
+	neq		$tmp642 texHoles $const19 	%argrw{"wrr"}
+	neq		$tmp643 $tmp642 $const6 	%argrw{"wrr"}
+	assign		$tmp641 $tmp643 	%argrw{"wr"}
+	if		$tmp641 1260 1260 	%argrw{"r"}
+	assign		___380_res $const2 	%line{156} %argrw{"wr"}
+	assign		___380_tres $const2 	%line{157} %argrw{"wr"}
+	functioncall	$const15 1235 	%line{158} %argrw{"r"}
+	noise		___380_res $const12 randomPack 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{148} %argrw{"wrr"}
+	lt		$tmp644 ___380_res $const2 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{159} %argrw{"wrr"}
+	if		$tmp644 1238 1238 	%argrw{"r"}
+	mul		___380_res ___380_res ___380_res 	%argrw{"wrr"}
+	assign		$tmp646 texHoles 	%line{160} %argrw{"wr"}
+	add		$tmp645 $tmp646 $const4 	%argrw{"wrr"}
+	div		$tmp647 $const4 $tmp645 	%argrw{"wrr"}
+	functioncall	$const20 1257 	%argrw{"r"}
+	lt		$tmp648 ___380_res $const2 	%filename{"E:/github\\elaramax\\Shaders\\ei_std.h"} %line{307} %argrw{"wrr"}
+	if		$tmp648 1246 1246 	%argrw{"r"}
+	assign		___380_tres $const6 	%line{309} %argrw{"wr"}
+	return
+	gt		$tmp649 ___380_res $tmp647 	%line{312} %argrw{"wrr"}
+	if		$tmp649 1250 1250 	%argrw{"r"}
+	assign		___380_tres $const5 	%line{314} %argrw{"wr"}
+	return
+	eq		$tmp650 $const2 $tmp647 	%line{317} %argrw{"wrr"}
+	if		$tmp650 1254 1254 	%argrw{"r"}
+	assign		___380_tres ___380_res 	%line{319} %argrw{"wr"}
+	return
+	sub		$tmp651 ___380_res $const2 	%line{322} %argrw{"wrr"}
+	sub		$tmp652 $tmp647 $const2 	%argrw{"wrr"}
+	div		___380_tres $tmp651 $tmp652 	%argrw{"wrr"}
+	eq		$tmp653 ___380_tres $const4 	%filename{"E:/github/elaramax/Shaders/max_tiles.osl"} %line{161} %argrw{"wrr"}
+	if		$tmp653 1260 1260 	%argrw{"r"}
+	assign		___369_mixer $const2 	%argrw{"wr"}
+	eq		$tmp654 texHoles $const19 	%line{163} %argrw{"wrr"}
+	if		$tmp654 1263 1263 	%argrw{"r"}
+	assign		___369_mixer $const2 	%argrw{"wr"}
+	assign		$tmp449 ___369_mixer 	%line{164} %argrw{"wr"}
+	sub		$tmp655 mixer $tmp449 	%line{335} %argrw{"wrr"}
+	div		___386_dfdv $tmp655 ___386_d_v 	%argrw{"wrr"}
+	normalize	$tmp656 dPdu 	%line{337} %argrw{"wr"}
+	mul		$tmp657 $tmp656 ___386_dfdu 	%argrw{"wrr"}
+	normalize	$tmp658 dPdv 	%argrw{"wr"}
+	mul		$tmp659 $tmp658 ___386_dfdv 	%argrw{"wrr"}
+	add		$tmp660 $tmp657 $tmp659 	%argrw{"wrr"}
+	mul		result_bump $const22 $tmp660 	%argrw{"wrr"}
+	end
