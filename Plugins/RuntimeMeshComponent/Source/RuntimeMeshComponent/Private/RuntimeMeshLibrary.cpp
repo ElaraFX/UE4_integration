@@ -15,7 +15,9 @@
 
 URuntimeMeshLibrary::URuntimeMeshLibrary(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer),
-	 mpEssImporter(NULL)
+	 mpEssImporter(NULL),
+	 mCurrentActor(NULL),
+	 mLastNodeIndex(INDEX_NONE)
 {
 
 }
@@ -165,14 +167,102 @@ void URuntimeMeshLibrary::DoImportEss(const FString& filename)
 		{
 			OnComplete.BindUObject(this, &URuntimeMeshLibrary::OnEssParseFinished);
 		}
-		mpEssImporter = new FEssImporter(filename, OnComplete);
+		mpEssImporter = new FEssImporter();
+		if (!mpEssImporter->Initialize(filename, OnComplete))
+		{
+			FString errorMsg = FString::Printf(TEXT("Can't find file : %s."), *filename);
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *errorMsg);
+			delete mpEssImporter;
+			mpEssImporter = NULL;
+		}
 	}
+}
+
+void URuntimeMeshLibrary::DoImportMesh()
+{
+	if (NULL == mCurrentActor || INDEX_NONE == mLastNodeIndex)
+	{
+		return;
+	}
+
+	float startTime = FPlatformTime::Seconds();
+	const float MAX_IMPORT_TIME_SPAN = 0.05;
+	int nodeCount = mpEssImporter->GetNodeCount();
+	USceneComponent* RootComponent = mCurrentActor->GetRootComponent();
+	for (int i = mLastNodeIndex; i < nodeCount; ++i)
+	{
+		const FMaxNodeInfo* pNodeInfo = mpEssImporter->GetNodeInfo(i);
+		if (NULL == pNodeInfo)
+		{
+			continue;
+		}
+
+		if (i > mLastNodeIndex && i % 3 == 0)
+		{
+			float currentTime = FPlatformTime::Seconds();
+			if (currentTime - startTime > MAX_IMPORT_TIME_SPAN)
+			{
+				mLastNodeIndex = i;
+				if (!OnImportingMesh.IsBound())
+				{
+					OnImportingMesh.BindUObject(this, &URuntimeMeshLibrary::DoImportMesh);
+					GEngine->GameViewport->GetWorld()->GetTimerManager().SetTimer(mTimerHandle, OnImportingMesh, 0.05f, true);
+				}
+				return;
+			}
+		}
+
+		const FEssImporter::TMeshArray* pMeshArray = mpEssImporter->GetMeshInfo(pNodeInfo->meshName);
+		if (NULL == pMeshArray)
+		{
+			continue;
+		}
+
+		URuntimeMeshComponent* runtimeMesh = NewObject<URuntimeMeshComponent>(RootComponent, *pNodeInfo->name, RF_Transactional);
+		for (int j = 0; j < pMeshArray->Num(); ++j)
+		{
+			const FMeshInfo& meshInfo = (*pMeshArray)[j];
+			runtimeMesh->CreateMeshSection(j, meshInfo.Vertices, !pNodeInfo->bInvertVertexOrder ? meshInfo.Triangles : meshInfo.InvertTriangles,
+				meshInfo.Normals, meshInfo.Uv1s, meshInfo.Uv2s.Num() > 0 ? meshInfo.Uv2s : meshInfo.Uv1s, TArray<FColor>(), meshInfo.Tangents, true, EUpdateFrequency::Infrequent);
+			UMaterialInterface* pMaterial = mpEssImporter->GetNodeMaterial(i, j, meshInfo.mtlIndex, runtimeMesh);
+			if (NULL == pMaterial)
+			{
+				pMaterial = UMaterial::GetDefaultMaterial(MD_Surface);
+			}
+			runtimeMesh->SetMaterial(j, pMaterial);
+		}
+
+		FTransform worldTransform(pNodeInfo->matrix);
+		runtimeMesh->SetWorldTransform(worldTransform);
+		runtimeMesh->DepthPriorityGroup = SDPG_World;
+		runtimeMesh->Mobility = EComponentMobility::Movable;
+		runtimeMesh->SetFlags(RF_Transactional);
+		mCurrentActor->AddInstanceComponent(runtimeMesh);
+		runtimeMesh->RegisterComponent();
+		runtimeMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	}
+
+	GEngine->GameViewport->GetWorld()->GetTimerManager().ClearTimer(mTimerHandle);
+	delete mpEssImporter;
+	mpEssImporter = NULL;
+	mCurrentActor = NULL;
+	mLastNodeIndex = INDEX_NONE;
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Ess Imported!"));
 }
 
 void URuntimeMeshLibrary::OnEssParseFinished()
 {
 	if (NULL != mpEssImporter && mpEssImporter->CheckParseFinished())
 	{
+		if (!mpEssImporter->GetParseResult())
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Ess file parse failure."));
+			delete mpEssImporter;
+			mpEssImporter = NULL;
+			return;
+		}
+
 		UWorld* world = GEngine->GameViewport->GetWorld();
 		FActorSpawnParameters parameter;
 		parameter.Name = _T("3dsMaxRoot");
@@ -187,43 +277,10 @@ void URuntimeMeshLibrary::OnEssParseFinished()
 
 		rootActor->SetRootComponent(RootComponent);
 		rootActor->AddInstanceComponent(RootComponent);
+		mLastNodeIndex = 0;
+		mCurrentActor = rootActor;
 
-		int nodeCount = mpEssImporter->GetNodeCount();
-		for (int i = 0; i < nodeCount; ++i)
-		{
-			const FMaxNodeInfo* pNodeInfo = mpEssImporter->GetNodeInfo(i);
-			if (NULL == pNodeInfo)
-			{
-				continue;
-			}
-
-			const FEssImporter::TMeshArray* pMeshArray = mpEssImporter->GetMeshInfo(pNodeInfo->meshName);
-			if (NULL == pMeshArray)
-			{
-				continue;
-			}
-
-			URuntimeMeshComponent* runtimeMesh = NewObject<URuntimeMeshComponent>(RootComponent, *pNodeInfo->name, RF_Transactional);
-			for (int j = 0; j < pMeshArray->Num(); ++j)
-			{
-				const FMeshInfo& meshInfo = (*pMeshArray)[j];
-				runtimeMesh->CreateMeshSection(j, meshInfo.Vertices, !pNodeInfo->bInvertVertexOrder ? meshInfo.Triangles : meshInfo.InvertTriangles, 
-					meshInfo.Normals, meshInfo.Uv1s, meshInfo.Uv2s, TArray<FColor>(), meshInfo.Tangents, true, EUpdateFrequency::Infrequent);
-				runtimeMesh->SetMaterial(j, UMaterial::GetDefaultMaterial(MD_Surface));
-			}
-
-			FTransform worldTransform(pNodeInfo->matrix);
-			runtimeMesh->SetWorldTransform(worldTransform);
-			runtimeMesh->DepthPriorityGroup = SDPG_World;
-			runtimeMesh->Mobility = EComponentMobility::Movable;
-			runtimeMesh->SetFlags(RF_Transactional);
-			rootActor->AddInstanceComponent(runtimeMesh);
-			runtimeMesh->RegisterComponent();
-			runtimeMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-		}
-
-		delete mpEssImporter;
-		mpEssImporter = NULL;
+		DoImportMesh();		
 	}
 }
 

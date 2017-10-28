@@ -18,6 +18,9 @@ public class RuntimeMeshComponent : ModuleRules
     public RuntimeMeshComponent(ReadOnlyTargetRules rules): base(rules)
 	{
         PrivateIncludePaths.Add("RuntimeMeshComponent/Private");
+        string ue4_include_path = Path.GetFullPath(Path.Combine(BuildConfiguration.RelativeEnginePath, "Source/Runtime/Engine/Private"));
+        PublicIncludePaths.Add(ue4_include_path);
+        PrivateIncludePaths.Add("RuntimeMeshComponent/Private");
         PublicIncludePaths.Add("RuntimeMeshComponent/Public");
 
         PublicDependencyModuleNames.AddRange(
@@ -31,6 +34,16 @@ public class RuntimeMeshComponent : ModuleRules
                         "RHI"
                 }
             );
+        if (UEBuildConfiguration.bBuildEditor)
+        {
+            PublicDependencyModuleNames.AddRange(
+                new string[]
+                {
+                    "UnrealEd",
+                    "MaterialEditor"
+                });
+
+        }
         LoadElaraSDK(rules);
     }
 

@@ -131,6 +131,11 @@ class RUNTIMEMESHCOMPONENT_API URuntimeMeshLibrary : public UBlueprintFunctionLi
 private:
 	FEssImporter* mpEssImporter;
 	FTimerDelegate OnComplete;
+	FTimerDelegate OnImportingMesh;
+	int32 mLastNodeIndex;
+	AActor* mCurrentActor;
+	FTimerHandle mTimerHandle;
 	void DoImportEss(const FString& filename);
 	void OnEssParseFinished();
+	void DoImportMesh();
 };

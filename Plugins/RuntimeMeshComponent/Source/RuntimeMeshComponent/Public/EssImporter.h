@@ -26,18 +26,23 @@ struct FMeshInfo
 	int mtlIndex;
 };
 
+struct FParseMaterialContext;
+
 class FEssImporter : public FRunnable
 {
 public:
-	FEssImporter(const FString& FullPath, const FTimerDelegate& timerDelegate);
+	FEssImporter();
 	~FEssImporter();
 
 	typedef TArray<FMeshInfo> TMeshArray;
+	bool Initialize(const FString& FullPath, const FTimerDelegate& timerDelegate);
 
 	int GetNodeCount() const;
 	const FMaxNodeInfo* GetNodeInfo(int index) const;
 	const TMeshArray* GetMeshInfo(const FString& meshName) const;
 	bool CheckParseFinished();
+	inline bool GetParseResult() const { return mParseResult; };
+	UMaterialInterface* GetNodeMaterial(int nodeIndex, int subMeshIndex, int mtlIndex, UPrimitiveComponent* pMeshComponent);
 
 private:
 	struct FMeshMapInfo
@@ -58,6 +63,7 @@ private:
 	bool DoParseEssFile();
 	void InsertNodeInfo(const eiNodeAccessor& node);
 	bool ParseMesh(const eiNodeAccessor& node, FMeshMapInfo& meshMapInfo);
+	bool ParseMaterial(const eiNodeAccessor& shaderNode, FParseMaterialContext& context);
 	FRunnableThread* m_pThread;
 	FString m_strFullPath;
 
@@ -67,4 +73,8 @@ private:
 	TMeshMap mMeshMap;
 	FTimerHandle mTimerHandle;
 	FThreadSafeBool mParseFinished;
+	bool mParseResult;
+	TMap<FString, UMaterialInstanceDynamic*> mMaterailMap;
+	TMap<FString, int32> mVectorParamMap;
+	TMap<FString, int32> mScalarParamMap;
 };

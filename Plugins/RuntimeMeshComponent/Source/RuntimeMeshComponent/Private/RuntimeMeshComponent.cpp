@@ -1757,6 +1757,7 @@ void URuntimeMeshComponent::EnsureBodySetupCreated()
 
 void URuntimeMeshComponent::UpdateCollision()
 {
+	return;
 	SCOPE_CYCLE_COUNTER(STAT_RuntimeMesh_UpdateCollision);
 
 	UWorld* World = GetWorld();

@@ -1263,6 +1263,7 @@ private:
 	virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
 	virtual class UBodySetup* GetBodySetup() override;
 	virtual UMaterialInterface* GetMaterialFromCollisionFaceIndex(int32 FaceIndex, int32& SectionIndex) const override;
+	virtual bool ShouldCreatePhysicsState() const override { return false; };
 	//~ End UPrimitiveComponent Interface.
 
 	//~ Begin UMeshComponent Interface.
