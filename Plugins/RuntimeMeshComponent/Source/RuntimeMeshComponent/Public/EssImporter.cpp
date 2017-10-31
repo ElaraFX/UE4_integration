@@ -617,7 +617,6 @@ bool FEssImporter::ParseMaterial(const eiNodeAccessor& shaderNode, FParseMateria
 		return false;
 	}
 
-	int32& countOfNodesOfShaderID = context.shaderNodesCountPerType[shaderID];
 	for (eiInt i = 0; i < paramCount; ++i)
 	{
 		eiNodeParam* pNodeParam = ei_node_read_param(shaderNode.get(), i);
@@ -627,57 +626,62 @@ bool FEssImporter::ParseMaterial(const eiNodeAccessor& shaderNode, FParseMateria
 		}
 
 		eiNodeAccessor inputNode(pNodeParam->inst);
-		FString inputName = FString::Printf(TEXT("e%d%s%d"), shaderID, UTF8_TO_TCHAR(pNodeParam->unique_name), countOfNodesOfShaderID);
+		FString inputName = FString::Printf(TEXT("e%d%s0"), shaderID, UTF8_TO_TCHAR(pNodeParam->unique_name));
 		int32* pInputParamIndex = mVectorParamMap.Find(inputName);
 		if (pInputParamIndex)
 		{
 			int* pOutputShaderNodexIndex = context.existingShaderNodesMap.Find(UTF8_TO_TCHAR(inputNode->unique_name));
-			int outputShaderNodexIndex = INDEX_NONE;
-			if (NULL != pOutputShaderNodexIndex)
+			if (NULL == pOutputShaderNodexIndex)
 			{
-				outputShaderNodexIndex = *pOutputShaderNodexIndex;
-			}
-			else
-			{
-				if (!ParseMaterial(inputNode, context))
-				{
-					continue;
-				}
-				outputShaderNodexIndex = context.shaderNodeIDs.Num() - 1;
-			}
-
-			eiNodeParam* pOutputParam = ei_node_read_param(inputNode.get(), pNodeParam->param);
-			if (pOutputParam)
-			{
-				static TMap<FString, int32> sOutputIndexMap;
-				if (sOutputIndexMap.Num() == 0)
-				{
-					sOutputIndexMap.Add(TEXT("result"), 0);
-					sOutputIndexMap.Add(TEXT("result_bump"), 1);
-					sOutputIndexMap.Add(TEXT("result_mono"), 2);
-				}
-
-				int* pOutputIndexInShader = sOutputIndexMap.Find(UTF8_TO_TCHAR(pOutputParam->unique_name));
-				if (pOutputIndexInShader)
-				{
-					FLinearColor vector = context.pMaterial->VectorParameterValues[*pInputParamIndex].ParameterValue;
-					vector.A = outputShaderNodexIndex * 10 + *pOutputIndexInShader;
-					context.pMaterial->SetVectorParameterByIndex(*pInputParamIndex, vector);
-				}
+				ParseMaterial(inputNode, context);
 			}
 		}
 	}
 
+	int32& countOfNodesOfShaderID = context.shaderNodesCountPerType[shaderID];
 	for (eiInt i = 0; i < paramCount; ++i)
 	{
 		eiNodeParam* pNodeParam = ei_node_read_param(shaderNode.get(), i);
-		if (NULL == pNodeParam || EI_NULL_TAG != pNodeParam->inst)
+		if (NULL == pNodeParam)
 		{
 			continue;
 		}
 
 		FString paramName = FString::Printf(TEXT("e%d%s%d"), shaderID, UTF8_TO_TCHAR(pNodeParam->unique_name), countOfNodesOfShaderID);
-		if (IsVectorType(pNodeParam->type))
+		if (EI_NULL_TAG != pNodeParam->inst)
+		{
+			int32* pInputParamIndex = mVectorParamMap.Find(paramName);
+			if (pInputParamIndex)
+			{
+				eiNodeAccessor inputNode(pNodeParam->inst);
+				int* pOutputShaderNodexIndex = context.existingShaderNodesMap.Find(UTF8_TO_TCHAR(inputNode->unique_name));
+				if (NULL == pOutputShaderNodexIndex)
+				{
+					continue;
+				}
+
+				eiNodeParam* pOutputParam = ei_node_read_param(inputNode.get(), pNodeParam->param);
+				if (pOutputParam)
+				{
+					static TMap<FString, int32> sOutputIndexMap;
+					if (sOutputIndexMap.Num() == 0)
+					{
+						sOutputIndexMap.Add(TEXT("result"), 0);
+						sOutputIndexMap.Add(TEXT("result_bump"), 1);
+						sOutputIndexMap.Add(TEXT("result_mono"), 2);
+					}
+
+					int* pOutputIndexInShader = sOutputIndexMap.Find(UTF8_TO_TCHAR(pOutputParam->unique_name));
+					if (pOutputIndexInShader)
+					{
+						FLinearColor vector = context.pMaterial->VectorParameterValues[*pInputParamIndex].ParameterValue;
+						vector.A = (*pOutputShaderNodexIndex) * 10 + *pOutputIndexInShader;
+						context.pMaterial->SetVectorParameterByIndex(*pInputParamIndex, vector);
+					}
+				}
+			}
+		}
+		else if (IsVectorType(pNodeParam->type))
 		{
 			int32* pInputParamIndex = mVectorParamMap.Find(paramName);
 			if (pInputParamIndex)
