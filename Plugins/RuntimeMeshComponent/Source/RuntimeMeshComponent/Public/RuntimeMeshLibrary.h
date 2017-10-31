@@ -34,7 +34,7 @@ class RUNTIMEMESHCOMPONENT_API URuntimeMeshLibrary : public UBlueprintFunctionLi
 	static void CreateBoxMesh(FVector BoxRadius, TArray<FVector>& Vertices, TArray<int32>& Triangles, TArray<FVector>& Normals, TArray<FVector2D>& UVs, TArray<FRuntimeMeshTangent>& Tangents);
 
 	UFUNCTION(BlueprintCallable, Category = "Components|Elara")
-	static void ImportEss(const FString& filename);
+	static void ImportEss(const FString& filename, bool inEditor = false);
 
 	/**
 	*	Automatically generate normals and tangent vectors for a mesh
@@ -135,7 +135,8 @@ private:
 	int32 mLastNodeIndex;
 	AActor* mCurrentActor;
 	FTimerHandle mTimerHandle;
-	void DoImportEss(const FString& filename);
+	bool mbInEditor;
+	void DoImportEss(const FString& filename, bool inEditor);
 	void OnEssParseFinished();
 	void DoImportMesh();
 };

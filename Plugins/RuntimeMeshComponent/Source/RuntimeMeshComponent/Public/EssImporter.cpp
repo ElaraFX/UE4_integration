@@ -344,7 +344,7 @@ void FEssImporter::InsertNodeInfo(const eiNodeAccessor& node)
 		return;
 	}
 
-	eiNodeAccessor element(elementTag);
+	eiDeferNodeAccessor element(elementTag);
 	eiDataAccessor<eiNodeDesc> desc(element->desc);
 	if (strcmp(ei_node_desc_name(desc.get()), "poly") != 0)
 	{
@@ -393,7 +393,7 @@ bool FEssImporter::DoParseEssFile()
 	char* filename = TCHAR_TO_UTF8(*m_strFullPath);
 	FString pluginPath = FPaths::GamePluginsDir() + TEXT("RuntimeMeshComponent/ThirdParty/ERSDK/shaders");
 	ei_add_shader_searchpath(TCHAR_TO_UTF8(*pluginPath));
-	if (!ei_parse2(filename)) {
+	if (!ei_parse2(filename, EI_TRUE)) {
 		ei_error("Failed to parse file: %s\n", filename);
 		return false;
 	}

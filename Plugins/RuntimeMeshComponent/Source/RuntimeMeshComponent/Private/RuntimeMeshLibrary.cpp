@@ -9,6 +9,10 @@
 #include "RuntimeMeshBuilder.h"
 #include "RuntimeMeshComponent.h"
 #include "EssImporter.h"
+#if WITH_EDITOR
+#include "Editor/EditorEngine.h"
+#include "Public/LevelEditorViewport.h"
+#endif
 
 #define LOCTEXT_NAMESPACE "RuntimeMeshLibrary"
 
@@ -17,7 +21,8 @@ URuntimeMeshLibrary::URuntimeMeshLibrary(const FObjectInitializer& ObjectInitial
 	: Super(ObjectInitializer),
 	 mpEssImporter(NULL),
 	 mCurrentActor(NULL),
-	 mLastNodeIndex(INDEX_NONE)
+	 mLastNodeIndex(INDEX_NONE),
+	 mbInEditor(false)
 {
 
 }
@@ -153,13 +158,13 @@ void URuntimeMeshLibrary::CreateBoxMesh(FVector BoxRadius, TArray<FVector>& Vert
 	UVs[3] = UVs[7] = UVs[11] = UVs[15] = UVs[19] = UVs[23] = FVector2D(1.f, 0.f);
 }
 
-void URuntimeMeshLibrary::ImportEss(const FString& filename)
+void URuntimeMeshLibrary::ImportEss(const FString& filename, bool inEditor)
 {
 	URuntimeMeshLibrary* pInst = NewObject<URuntimeMeshLibrary>();
-	pInst->DoImportEss(filename);
+	pInst->DoImportEss(filename, inEditor);
 }
 
-void URuntimeMeshLibrary::DoImportEss(const FString& filename)
+void URuntimeMeshLibrary::DoImportEss(const FString& filename, bool inEditor)
 {
 	if (!mpEssImporter && FPlatformProcess::SupportsMultithreading())
 	{
@@ -175,6 +180,7 @@ void URuntimeMeshLibrary::DoImportEss(const FString& filename)
 			delete mpEssImporter;
 			mpEssImporter = NULL;
 		}
+		mbInEditor = inEditor;
 	}
 }
 
@@ -262,8 +268,11 @@ void URuntimeMeshLibrary::OnEssParseFinished()
 			mpEssImporter = NULL;
 			return;
 		}
-
+#if WITH_EDITOR
+		UWorld* world = mbInEditor ? GEditor->LevelViewportClients[0]->GetWorld() : GEngine->GameViewport->GetWorld();
+#else
 		UWorld* world = GEngine->GameViewport->GetWorld();
+#endif
 		FActorSpawnParameters parameter;
 		parameter.Name = _T("3dsMaxRoot");
 		AActor* rootActor = (AActor*)world->SpawnActor(AActor::StaticClass(), &FTransform::Identity, parameter);

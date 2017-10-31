@@ -58,6 +58,7 @@ private:
 		TMeshArray meshArray;
 	};
 	typedef eiDataAccessor<eiNode> eiNodeAccessor;
+	typedef eiDeferDataAccessor<eiNode> eiDeferNodeAccessor;
 	typedef TMap<FString, FMeshMapInfo> TMeshMap;
 
 	bool DoParseEssFile();
