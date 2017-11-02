@@ -846,6 +846,7 @@ void UMaterialExpressionCustomMultiOut::DoCreateShaderBody()
 		"output_specular = outputs[lastIndex][0].w;\n"
 		"output_emissive = outputs[lastIndex][1];\n"
 		"output_roughness = outputs[lastIndex][1].w;\n"
+		"output_normal = outputs[lastIndex][2];\n"
 		"return output_diffuse;\n");
 }
 

@@ -44,6 +44,22 @@ float fresnel_schlick(float cosi, float eta, out float R0)
 	return clamp(R0 + (1.0f - R0) * F5, 0.0f, 1.0f);
 }
 
+// See http://www.rorydriscoll.com/2012/01/11/derivative-maps/
+// http://jbit.net/~sparky/sfgrad_bump/mm_sfgrad_bump.pdf for details
+float3 PerturbNormalLQ(float3 surf_pos , float3 surf_norm , float height, float amount) 
+{ 
+	float3 vSigmaS = ddx( surf_pos ); 
+	float3 vSigmaT = ddy( surf_pos ); 
+	float3 vN = surf_norm; // normalized
+	float3 vR1 = cross(vSigmaT ,vN); 
+	float3 vR2 = cross(vN,vSigmaS);
+	float fDet = dot(vSigmaS , vR1); 
+	float dBs = ddx_fine( height ); 
+	float dBt = ddy_fine( height );
+	float3 vSurfGrad = sign(fDet) * ( dBs * vR1 + dBt * vR2 ); 
+	return normalize(abs(fDet)*vN- 0.3 * vSurfGrad);
+}
+
 // START FUNCTION BODY
 
 void max_vray_mtl
@@ -119,7 +135,7 @@ void max_vray_mtl
 	int texmap_bump_isnull /* 0 */, 
 	float tex_alpha_texmap_bump /* 1 */, 
 	float texmap_bump_multiplier /* 1 */,
-	float3 tex_bump /* 0, 0, 0 */,
+	in float3 tex_bump /* 0, 0, 0 */,
 	in float3 texmap_reflectionGlossiness /* 0, 0, 0 */, 
 	int texmap_reflectionGlossiness_on /* 0 */, 
 	int texmap_reflectionGlossiness_isnull /* 0 */, 
@@ -186,23 +202,26 @@ void max_vray_mtl
 	float tex_alpha_texmap_self_illumination /* 1 */, 
 	float texmap_self_illumination_multiplier /* 1 */, 
 	out float4 output0 /* 0 */,
-	out float4 output1 /* 0 */
+	out float4 output1 /* 0 */,
+	out float4 output2 /* 0 */
 )
 {
 	float3 final_refraction = refraction_color;
 	if (texmap_refraction_on && !texmap_refraction_isnull)
 	{
 		float texmap_refraction_amount = texmap_refraction_multiplier * 0.01;
-	
 		final_refraction = (1 - tex_alpha_texmap_refraction * texmap_refraction_amount) * refraction_color + texmap_refraction_amount * texmap_refraction;
 	}
 
 	int no_bump = 0;
 	float3 Nshading = N;
-
 	if (!no_bump && texmap_bump_on && !texmap_bump_isnull)
 	{
-		//TODO calculate bump
+		float height = intensity(tex_bump);
+		float3 P = GetWorldPosition(Parameters);
+		// To fix the artifects appeared in the edge of triangles, try using the following statements
+		// float height = Texture2DSample(e0tex_fileName0, e0tex_fileName0Sampler, float2(uv0.x, 1 - uv0.y)).r;
+		Nshading = PerturbNormalLQ(P, N, height, texmap_bump_multiplier * 0.01);
 	}
 
 	float final_refraction_ior = refraction_ior;
@@ -299,4 +318,6 @@ void max_vray_mtl
 	output1.xyz = final_emissive;
 	// roughness
 	output1.w = final_roughness;
+	// normal
+	output2 = float4(Nshading,1);
 }

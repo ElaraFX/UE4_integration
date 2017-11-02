@@ -34,7 +34,7 @@ void max_stdout
 	int useRGBCurve /* 0*/,
 	in float3 stdout_color /* 0.0, 0.0, 0*/ ,
 	float tex_alpha_stdout_color /* 1 */ ,
-	float3 stdout_bump /* 0, 0, 0 */,
+	in float3 stdout_bump /* 0, 0, 0 */,
 	out float4 result /* 0, 0, 0 */,
 	out float3 result_bump /* 0, 0, 0 */
 )

@@ -56,6 +56,7 @@ void max_bitmap
 )
 {
 	result = float4(0, 0, 0, 1);
+	result_bump = float3(0, 0, 0);
 	float mu = tex_coords[0];
 	float mv = tex_coords[1];
 	
@@ -102,6 +103,7 @@ void max_bitmap
 			float fileAlpha = 1;
 			float2 coord = float2(mu, 1.0 - mv);
 			result = Texture2DSample(tex_fileName, tex_fileNameSampler, coord);
+			result_bump = result.xyz;
 			// TODO : resolve gamma issue, gamma should be input parameter
 			float Gamma = 1.0f;
 			if (Gamma > 0 && Gamma != 1)
@@ -139,7 +141,4 @@ void max_bitmap
 	{
 		result.a = 0;
 	}
-
-	// TODO : bump mapping
-	result_bump = float3(0, 0, 0);	
 }
