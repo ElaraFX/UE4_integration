@@ -207,7 +207,7 @@ public:
 
 		FString ParametersType = ShaderFrequency == SF_Vertex ? TEXT("Vertex") : (ShaderFrequency == SF_Domain ? TEXT("Tessellation") : TEXT("Pixel"));
 
-		FString ImplementationCode = FString::Printf(TEXT("%s\r\n /* FunctionFrameStamp %s*/\r\n%s CustomExpression%d(FMaterial%sParameters Parameters%s)\r\n{\r\n uint shaderIndex = 0;\r\nstruct Functions {\r\n%s};\r\n%s\r\n}\r\n"), *externalDepedency, *frameStamp, *OutputTypeString, CustomExpressionIndex, *ParametersType, *InputParamDecl, *innerFunctionBody, *Code);
+		FString ImplementationCode = FString::Printf(TEXT("%s\r\n /* FunctionFrameStamp %s*/\r\n%s CustomExpression%d(FMaterial%sParameters Parameters%s)\r\n{\r\n uint shaderIndex = 0;\r\nfloat4 gResult_bump = float4(0,0,0,-1);\r\nstruct Functions {\r\n%s};\r\n%s\r\n}\r\n"), *externalDepedency, *frameStamp, *OutputTypeString, CustomExpressionIndex, *ParametersType, *InputParamDecl, *innerFunctionBody, *Code);
 		CustomExpressionImplementations.Add(ImplementationCode);
 
 		// Add call to implementation function

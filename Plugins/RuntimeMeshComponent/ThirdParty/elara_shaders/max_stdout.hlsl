@@ -77,10 +77,12 @@ void max_stdout
 		if (bumpAmount != 1.0)
 		{
 			result_bump *= bumpAmount;
+			gResult_bump.xyz *= bumpAmount;
 		}
 		if (invert)
 		{
 			result_bump = -result_bump;
+			gResult_bump.xyz = -gResult_bump.xyz;
 		}
 	}
 }

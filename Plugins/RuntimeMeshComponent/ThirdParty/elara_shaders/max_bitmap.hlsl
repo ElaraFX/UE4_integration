@@ -104,6 +104,8 @@ void max_bitmap
 			float2 coord = float2(mu, 1.0 - mv);
 			result = Texture2DSample(tex_fileName, tex_fileNameSampler, coord);
 			result_bump = result.xyz;
+			gResult_bump = result;
+			gResult_bump.w = 1.0;
 			// TODO : resolve gamma issue, gamma should be input parameter
 			float Gamma = 1.0f;
 			if (Gamma > 0 && Gamma != 1)

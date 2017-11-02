@@ -217,7 +217,7 @@ void max_vray_mtl
 	float3 Nshading = N;
 	if (!no_bump && texmap_bump_on && !texmap_bump_isnull)
 	{
-		float height = intensity(tex_bump);
+		float height = gResult_bump.w > 0 ? gResult_bump.r : intensity(tex_bump);
 		float3 P = GetWorldPosition(Parameters);
 		// To fix the artifects appeared in the edge of triangles, try using the following statements
 		// float height = Texture2DSample(e0tex_fileName0, e0tex_fileName0Sampler, float2(uv0.x, 1 - uv0.y)).r;
