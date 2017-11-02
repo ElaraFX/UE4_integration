@@ -319,5 +319,6 @@ void max_vray_mtl
 	// roughness
 	output1.w = final_roughness;
 	// normal
+	Nshading *= Parameters.TwoSidedSign;
 	output2 = float4(Nshading,1);
 }
