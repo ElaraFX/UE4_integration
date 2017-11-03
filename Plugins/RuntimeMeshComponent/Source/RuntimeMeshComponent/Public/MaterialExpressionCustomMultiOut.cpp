@@ -26,6 +26,24 @@
 
 extern int32 GetShaderTypeID(const FString& shaderType);
 
+bool LoadFileString(FInputShaderInfo& shaderInfo, FString& fileString)
+{
+	if (FFileHelper::LoadFileToString(fileString, *shaderInfo.ShaderFilePath.FilePath))
+	{
+		return true;
+	}
+
+	FString fileName = FPaths::GetCleanFilename(shaderInfo.ShaderFilePath.FilePath);
+	fileName = FPaths::GetPath(FPaths::GetProjectFilePath()) + "/Plugins/RuntimeMeshComponent/ThirdParty/elara_shaders/" + fileName;
+	if (!FFileHelper::LoadFileToString(fileString, *fileName))
+	{
+		return false;
+	}
+
+	shaderInfo.ShaderFilePath.FilePath = fileName;
+	return true;
+}
+
 #if WITH_EDITOR
 class FHLSLMaterialTranslatorEx : public FHLSLMaterialTranslator
 {
@@ -39,7 +57,7 @@ public:
 		for (auto& shaderInfo : inputShaders)
 		{
 			FString fileString;
-			if (!FFileHelper::LoadFileToString(fileString, *shaderInfo.ShaderFilePath.FilePath))
+			if (!LoadFileString(const_cast<FInputShaderInfo&>(shaderInfo), fileString))
 			{
 				continue;
 			}
@@ -515,24 +533,6 @@ struct FNonArrayParameters
 	FString inputParameter;
 	TArray<FString> parameters;
 };
-
-bool LoadFileString(FInputShaderInfo& shaderInfo, FString& fileString)
-{
-	if (FFileHelper::LoadFileToString(fileString, *shaderInfo.ShaderFilePath.FilePath))
-	{
-		return true;
-	}
-
-	FString fileName = FPaths::GetCleanFilename(shaderInfo.ShaderFilePath.FilePath);
-	fileName = FPaths::GetPath(FPaths::GetProjectFilePath()) + "/Plugins/RuntimeMeshComponent/ThirdParty/elara_shaders/" + fileName;
-	if (!FFileHelper::LoadFileToString(fileString, *fileName))
-	{
-		return false;
-	}
-
-	shaderInfo.ShaderFilePath.FilePath = fileName;
-	return true;
-}
 
 bool UMaterialExpressionCustomMultiOut::DoImportShader(int32 currentShaderIndex)
 {
