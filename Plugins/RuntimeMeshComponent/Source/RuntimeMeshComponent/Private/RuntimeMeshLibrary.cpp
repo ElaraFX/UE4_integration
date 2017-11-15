@@ -241,7 +241,7 @@ void URuntimeMeshLibrary::DoImportMesh()
 		FTransform worldTransform(pNodeInfo->matrix);
 		runtimeMesh->SetWorldTransform(worldTransform);
 		runtimeMesh->DepthPriorityGroup = SDPG_World;
-		runtimeMesh->Mobility = EComponentMobility::Movable;
+		runtimeMesh->Mobility = EComponentMobility::Static;
 		runtimeMesh->SetFlags(RF_Transactional);
 		mCurrentActor->AddInstanceComponent(runtimeMesh);
 		runtimeMesh->RegisterComponent();
@@ -280,7 +280,7 @@ void URuntimeMeshLibrary::OnEssParseFinished()
 		rootActor->SetActorLabel(parameter.Name.ToString());
 #endif // WITH_EDITOR
 		USceneComponent* RootComponent = NewObject<USceneComponent>(rootActor, USceneComponent::GetDefaultSceneRootVariableName(), RF_Transactional);
-		RootComponent->Mobility = EComponentMobility::Movable;
+		RootComponent->Mobility = EComponentMobility::Static;
 		RootComponent->SetWorldTransform(FTransform::Identity);
 		RootComponent->SetWorldLocation(FVector::ZeroVector);
 

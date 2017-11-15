@@ -150,6 +150,11 @@ private:
 		}
 	}
 
+	virtual bool SupportsStaticLighting() const override
+	{
+		return true;
+	}
+
 public:
 
 	URuntimeMeshComponent(const FObjectInitializer& ObjectInitializer);
