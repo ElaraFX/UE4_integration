@@ -184,6 +184,8 @@ void URuntimeMeshLibrary::DoImportEss(const FString& filename, bool inEditor)
 	}
 }
 
+extern UMaterial* GetDefaultMaterial();
+
 void URuntimeMeshLibrary::DoImportMesh()
 {
 	if (NULL == mCurrentActor || INDEX_NONE == mLastNodeIndex)
@@ -233,7 +235,7 @@ void URuntimeMeshLibrary::DoImportMesh()
 			UMaterialInterface* pMaterial = mpEssImporter->GetNodeMaterial(i, j, meshInfo.mtlIndex, runtimeMesh);
 			if (NULL == pMaterial)
 			{
-				pMaterial = UMaterial::GetDefaultMaterial(MD_Surface);
+				pMaterial = GetDefaultMaterial();
 			}
 			runtimeMesh->SetMaterial(j, pMaterial);
 		}

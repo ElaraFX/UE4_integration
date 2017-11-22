@@ -765,6 +765,11 @@ static FORCEINLINE UMaterial* LoadMatFromPath(const FName& Path)
 	return LoadObjFromPath<UMaterial>(Path);
 }
 
+UMaterial* GetDefaultMaterial()
+{
+	return LoadMatFromPath(FName(TEXT("Material'/RuntimeMeshComponent/DefaultEssMat.DefaultEssMat'")));
+}
+
 UMaterialInterface* FEssImporter::GetNodeMaterial(int nodeIndex, int subMeshIndex, int mtlIndex, UPrimitiveComponent* pMeshComponent)
 {
 	char* nodeName = TCHAR_TO_UTF8(*mNodeArray[nodeIndex].name);
