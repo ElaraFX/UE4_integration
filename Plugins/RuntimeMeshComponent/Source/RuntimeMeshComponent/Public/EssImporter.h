@@ -35,7 +35,7 @@ public:
 	~FEssImporter();
 
 	typedef TArray<FMeshInfo> TMeshArray;
-	bool Initialize(const FString& FullPath, const FTimerDelegate& timerDelegate);
+	bool Initialize(const FString& FullPath, const FTimerDelegate& timerDelegate, bool inEditor);
 
 	int GetNodeCount() const;
 	const FMaxNodeInfo* GetNodeInfo(int index) const;
@@ -78,4 +78,5 @@ private:
 	TMap<FString, UMaterialInstanceDynamic*> mMaterailMap;
 	TMap<FString, int32> mVectorParamMap;
 	TMap<FString, int32> mScalarParamMap;
+	bool mbInEditor;
 };

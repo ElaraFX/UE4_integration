@@ -48,7 +48,7 @@ extern int32 GetShaderTypeID(const FString& shaderType)
 	return INDEX_NONE;
 }
 
-FEssImporter::FEssImporter() : m_pThread(NULL), mParseResult(false)
+FEssImporter::FEssImporter() : m_pThread(NULL), mParseResult(false), mbInEditor(false)
 { }
 
 FEssImporter::~FEssImporter()
@@ -61,7 +61,7 @@ FEssImporter::~FEssImporter()
 	}
 }
 
-bool FEssImporter::Initialize(const FString& FullPath, const FTimerDelegate& timerDelegate)
+bool FEssImporter::Initialize(const FString& FullPath, const FTimerDelegate& timerDelegate, bool inEditor)
 {
 	if (!FPaths::FileExists(FullPath))
 	{
@@ -72,6 +72,7 @@ bool FEssImporter::Initialize(const FString& FullPath, const FTimerDelegate& tim
 	m_strFullPath = FullPath;
 	m_pThread = FRunnableThread::Create(this, TEXT("FEssImporter"), 0, EThreadPriority::TPri_BelowNormal);
 	GEngine->GameViewport->GetWorld()->GetTimerManager().SetTimer(mTimerHandle, timerDelegate, 1.0f, true);
+	mbInEditor = inEditor;
 	return true;
 }
 
@@ -533,13 +534,14 @@ struct FParseMaterialContext
 	TArray<int32> shaderNodeIDs;
 };
 
-UTexture2D* CreateTexture2D(const FString& filename)
+UTexture2D* CreateTexture2D(const FString& filename, UObject* pOwner, bool inEditor)
 {
 	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
 	TArray<uint8> RawFileData;
 	if (FFileHelper::LoadFileToArray(RawFileData, *filename))
 	{
 		FString extension = FPaths::GetExtension(filename).Trim().ToLower();
+		FString cleanName = FPaths::GetBaseFilename(filename).Trim().ToLower();
 		EImageFormat::Type format = EImageFormat::Invalid;
 		if (extension == TEXT("png"))
 		{
@@ -561,6 +563,12 @@ UTexture2D* CreateTexture2D(const FString& filename)
 				IImageWrapperPtr ImageWrapper = ImageWrapperModule.CreateImageWrapper(format);
 				if (!ImageWrapper.IsValid())
 				{
+					if (EImageFormat::JPEG == format)
+					{
+						// so failed for jpeg format, try use gray scale jpeg format
+						format = EImageFormat::GrayscaleJPEG;
+						continue;
+					}
 					break;
 				}
 
@@ -570,35 +578,28 @@ UTexture2D* CreateTexture2D(const FString& filename)
 					bool isGrayScale = EImageFormat::GrayscaleJPEG == format;
 					if (ImageWrapper->GetRaw(isGrayScale ? ERGBFormat::Gray : ERGBFormat::BGRA, 8, UncompressedBGRA))
 					{
-						UTexture2D* textureParam = UTexture2D::CreateTransient(ImageWrapper->GetWidth(), ImageWrapper->GetHeight(), isGrayScale ? PF_G8 : PF_B8G8R8A8);
+						UTexture2D* textureParam = NewObject<UTexture2D>(pOwner, FName(*cleanName), inEditor ? RF_Transactional : RF_Transient);
+						textureParam->Source.Init(ImageWrapper->GetWidth(), ImageWrapper->GetHeight(), /*NumSlices=*/ 1, /*NumMips=*/ 1, isGrayScale ? TSF_G8 : TSF_BGRA8);
 						// textureParam->MipGenSettings = TMGS_NoMipmaps;
 						//textureParam->AddressX = TA_Clamp;
 						//textureParam->AddressY = TA_Clamp;
 
-						void* TextureData = textureParam->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+						uint8* TextureData = textureParam->Source.LockMip(0);
 						if (TextureData)
 						{
 							FMemory::Memcpy(TextureData, UncompressedBGRA->GetData(), UncompressedBGRA->Num());
-							textureParam->PlatformData->Mips[0].BulkData.Unlock();
-
-							// Update the rendering resource from data.
-							(*textureParam).UpdateResource();
+							textureParam->Source.UnlockMip(0);
+							textureParam->PostEditChange();
 						}
 						else
 						{
-							textureParam->PlatformData->Mips[0].BulkData.Unlock();
+							textureParam->Source.UnlockMip(0);
 							textureParam->ConditionalBeginDestroy();
 							textureParam = NULL;
 						}
 
 						return textureParam;
 					}
-				}
-				if (EImageFormat::JPEG == format)
-				{
-					// so failed for jpeg format, try use gray scale jpeg format
-					format = EImageFormat::GrayscaleJPEG;
-					continue;
 				}
 				break;
 			}
@@ -736,7 +737,7 @@ bool FEssImporter::ParseMaterial(const eiNodeAccessor& shaderNode, FParseMateria
 			else if (SHADER_ID_BITMAP == shaderID && strcmp(pNodeParam->unique_name, "tex_fileName") == 0)
 			{
 				FString filename = UTF8_TO_TCHAR(token.str);
-				UTexture2D* textureParam = CreateTexture2D(filename);
+				UTexture2D* textureParam = CreateTexture2D(filename, context.pMaterial, mbInEditor);
 				if (NULL != textureParam)
 				{
 					context.pMaterial->SetTextureParameterValue(*paramName, textureParam);

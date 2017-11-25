@@ -173,7 +173,7 @@ void URuntimeMeshLibrary::DoImportEss(const FString& filename, bool inEditor)
 			OnComplete.BindUObject(this, &URuntimeMeshLibrary::OnEssParseFinished);
 		}
 		mpEssImporter = new FEssImporter();
-		if (!mpEssImporter->Initialize(filename, OnComplete))
+		if (!mpEssImporter->Initialize(filename, OnComplete, inEditor))
 		{
 			FString errorMsg = FString::Printf(TEXT("Can't find file : %s."), *filename);
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *errorMsg);
