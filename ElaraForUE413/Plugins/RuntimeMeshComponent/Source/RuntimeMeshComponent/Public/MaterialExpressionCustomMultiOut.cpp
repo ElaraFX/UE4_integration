@@ -549,6 +549,8 @@ void SetMask(FExpressionOutput& output, int32 UseMask, int32 R, int32 G, int32 B
 	output.MaskA = A;
 }
 
+#if WITH_EDITOR
+
 TSharedPtr<class IMaterialEditor> GetIMaterialEditorForObject(const UObject* ObjectToFocusOn)
 {
 	check(ObjectToFocusOn);
@@ -567,6 +569,8 @@ TSharedPtr<class IMaterialEditor> GetIMaterialEditorForObject(const UObject* Obj
 	}
 	return MaterialEditor;
 }
+
+#endif
 
 bool UMaterialExpressionCustomMultiOut::DoImportShader(int32 currentShaderIndex)
 {
