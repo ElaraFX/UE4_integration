@@ -482,6 +482,45 @@ int32 GetShaderID(const eiDataAccessor<eiNode>& node)
 	return GetShaderTypeID(shaderName);
 }
 
+bool IsTransparentMaterial(const eiDataAccessor<eiNode>& node)
+{
+	eiIndex index = ei_node_find_param(node.get(), "refraction_color");
+	if (index != EI_NULL_INDEX)
+	{
+		eiColor* color = ei_node_get_color(node.get(), index);
+		if (color && (color->r > 0 || color->g > 0 || color->b > 0))
+		{
+			return true;
+		}
+	}
+
+	index = ei_node_find_param(node.get(), "texmap_refraction_on");
+	eiIndex index2 = ei_node_find_param(node.get(), "texmap_refraction_isnull");
+	if (index != EI_NULL_INDEX && index2 != EI_NULL_INDEX)
+	{
+		eiInt refractionOn = ei_node_get_int(node.get(), index);
+		eiInt refraction_isnull = ei_node_get_int(node.get(), index2);
+		if (refractionOn && !refraction_isnull)
+		{
+			return true;
+		}
+	}
+
+	index = ei_node_find_param(node.get(), "texmap_opacity_on");
+	index2 = ei_node_find_param(node.get(), "texmap_opacity_isnull");
+	if (index != EI_NULL_INDEX && index2 != EI_NULL_INDEX)
+	{
+		eiInt opacityOn = ei_node_get_int(node.get(), index);
+		eiInt texmap_opacity_isnull = ei_node_get_int(node.get(), index2);
+		if (opacityOn && !texmap_opacity_isnull)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool IsVectorType(eiShort type)
 {
 	switch (type)
@@ -846,7 +885,9 @@ UMaterialInterface* FEssImporter::GetNodeMaterial(int nodeIndex, int subMeshInde
 		return NULL;
 	}
 
-	UMaterial* pEssMaterial = LoadMatFromPath(FName(TEXT("Material'/RuntimeMeshComponent/EssMaterial.EssMaterial'")));
+	bool isTransparent = IsTransparentMaterial(shaderRoot);
+	UMaterial* pEssMaterial = LoadMatFromPath(isTransparent ? FName(TEXT("Material'/RuntimeMeshComponent/EssMaterialTransparent.EssMaterialTransparent'")) : 
+		FName(TEXT("Material'/RuntimeMeshComponent/EssMaterial.EssMaterial'")));
 	if (NULL == pEssMaterial)
 	{
 		return NULL;
